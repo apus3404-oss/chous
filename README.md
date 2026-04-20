@@ -140,6 +140,17 @@ in assets:
 - `django`: Django project structure and app conventions.
 - `laravel`: Laravel directory structure and naming conventions.
 
+## 📚 Configuration Examples
+
+Need inspiration? Check out our [examples directory](examples/) with ready-to-use configurations:
+
+- **[Monorepo](examples/monorepo.chous)** - Turborepo/Nx workspace with multiple apps and shared packages
+- **[Full-Stack](examples/fullstack.chous)** - Next.js frontend + Node.js backend structure
+- **[Microservices](examples/microservices.chous)** - Multiple independent services with shared libraries
+- **[Library](examples/library.chous)** - NPM package/library structure with tests and docs
+
+Each example includes detailed comments and best practices. Copy, customize, and adapt to your project!
+
 ## 🔧 Development
 
 Want to contribute? Here's how to get started:
