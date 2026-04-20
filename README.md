@@ -137,6 +137,30 @@ in assets:
 - `go`: Standard Go workspace layouts.
 - `python`: PEP 8 and common Python project structures.
 
+## 🔧 Development
+
+Want to contribute? Here's how to get started:
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/chous.git
+cd chous
+
+# Install dependencies (requires Bun or Node.js 18+)
+bun install  # or: npm install
+
+# Run in development mode
+bun run dev
+
+# Run tests
+bun test
+
+# Build the project
+bun run build
+```
+
+For detailed contribution guidelines, architecture overview, and testing instructions, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE).
