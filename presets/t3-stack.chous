@@ -1,0 +1,267 @@
+# ========================================
+#  © 2025 Cheez Lin
+#  https://cheez.tech
+#
+#  MIT Licensed
+# ========================================
+
+# ========================================
+#  T3 Stack project directory structure
+# ========================================
+# Reference: https://create.t3.gg/en/usage/first-steps
+# T3 Stack = Next.js + tRPC + Prisma + NextAuth.js + Tailwind CSS
+
+import nextjs
+
+# Must have T3 Stack config files
+must have [package.json, next.config.js, next.config.mjs, next.config.ts]
+
+# T3 Stack standard top-level directories
+allow [
+  # Core directories
+  src, prisma, public,
+
+  # Common additional directories
+  drizzle
+]
+
+# T3 Stack config files
+allow [
+  # Next.js
+  next.config.js, next.config.mjs, next.config.ts,
+  next-env.d.ts,
+
+  # TypeScript
+  tsconfig.json, tsconfig.tsbuildinfo,
+
+  # Tailwind CSS
+  tailwind.config.ts, tailwind.config.js,
+  postcss.config.js, postcss.config.cjs,
+
+  # Prisma
+  prisma, schema.prisma,
+
+  # Drizzle (alternative to Prisma)
+  drizzle.config.ts,
+
+  # Environment
+  .env, .env.example, .env.local,
+
+  # Package managers
+  package.json, package-lock.json,
+  pnpm-lock.yaml, yarn.lock, bun.lockb,
+
+  # Linting and formatting
+  .eslintrc.json, .eslintrc.cjs, .eslintrc.js,
+  .prettierrc, .prettierrc.json, .prettierrc.js,
+
+  # Testing
+  vitest.config.ts, playwright.config.ts
+]
+
+# ========================================
+#  Src directory
+# ========================================
+
+in src:
+  # Allow T3 Stack standard directories
+  allow [
+    # Next.js App Router
+    app,
+
+    # tRPC server
+    server,
+
+    # Shared code
+    components, lib, utils, hooks, styles, types,
+
+    # Environment variables
+    env,
+
+    # Internationalization
+    i18n, locales
+  ]
+
+  # App directory (Next.js App Router)
+  in app:
+    # Import Next.js app directory rules
+    allow [
+      # Route files
+      layout.tsx, page.tsx, loading.tsx, error.tsx,
+      not-found.tsx, global-error.tsx, route.ts,
+      template.tsx, default.tsx,
+
+      # Metadata files
+      opengraph-image.{tsx,ts,jpg,png},
+      twitter-image.{tsx,ts,jpg,png},
+      icon.{tsx,ts,ico,jpg,png},
+      apple-icon.{tsx,ts,jpg,png},
+      favicon.ico,
+      sitemap.{ts,xml}, robots.{ts,txt},
+      manifest.{ts,json,webmanifest},
+
+      # API routes
+      api,
+
+      # Common directories
+      _components, _lib, _utils,
+
+      # Global styles
+      globals.css
+    ]
+
+    use kebab-case for dirs *
+    use kebab-case for files **/{layout,page,loading,error,not-found,global-error,route,template,default}.{tsx,ts}
+
+    # Components in app directory
+    in _components:
+      use PascalCase, kebab-case for files **/*.{tsx,ts}
+      use kebab-case for dirs *
+
+    # API routes
+    in api:
+      use kebab-case for dirs *
+      use kebab-case for files **/route.ts
+
+      # tRPC API route
+      in trpc:
+        allow [[...trpc]]
+
+        in [...trpc]:
+          allow [route.ts]
+
+      # NextAuth API route
+      in auth:
+        allow [[...nextauth]]
+
+        in [...nextauth]:
+          allow [route.ts]
+
+  # Server directory (tRPC)
+  in server:
+    allow [api, auth, db.ts, db, trpc.ts]
+
+    # tRPC API routers
+    in api:
+      allow [root.ts, routers, trpc.ts]
+
+      in routers:
+        use camelCase for files *.ts
+        use camelCase for dirs *
+
+    # Auth configuration
+    in auth:
+      allow [config.ts, index.ts]
+
+    # Database
+    in db:
+      allow [index.ts, schema.ts, client.ts]
+      use camelCase for files *.ts
+
+  # Components
+  in components:
+    use PascalCase, kebab-case for files **/*.{tsx,ts}
+    use kebab-case for dirs *
+
+    # UI components (shadcn/ui pattern)
+    in ui:
+      use kebab-case for files *.{tsx,ts}
+
+  # Lib (utilities and configurations)
+  in lib:
+    use camelCase, kebab-case for files **/*.{ts,tsx}
+    use kebab-case for dirs *
+
+    # Common lib files
+    allow [
+      utils.ts, cn.ts,
+      api.ts, trpc.ts,
+      auth.ts, session.ts,
+      db.ts, prisma.ts, drizzle.ts,
+      validations.ts, schemas.ts
+    ]
+
+  # Utils
+  in utils:
+    use camelCase, kebab-case for files **/*.ts
+    use kebab-case for dirs *
+
+  # Hooks
+  in hooks:
+    use camelCase for files *.{ts,tsx} prefix: /^use/
+
+  # Styles
+  in styles:
+    use kebab-case for files **/*.{css,scss}
+
+  # Types
+  in types:
+    use camelCase, kebab-case for files *.{ts,d.ts}
+
+  # Environment variables validation
+  in env:
+    allow [client.ts, server.ts, index.ts]
+
+# ========================================
+#  Prisma directory
+# ========================================
+
+in prisma:
+  allow [schema.prisma, seed.ts, migrations]
+
+  # Migrations
+  in migrations:
+    use snake_case for dirs *
+
+    in *:
+      allow [migration.sql]
+
+# ========================================
+#  Drizzle directory (alternative to Prisma)
+# ========================================
+
+in drizzle:
+  allow [schema.ts, migrate.ts, migrations]
+
+  in migrations:
+    use snake_case for files *.sql prefix: /^\d{4}_/
+
+# ========================================
+#  Public directory
+# ========================================
+
+in public:
+  allow [
+    favicon.ico, robots.txt, sitemap.xml,
+    images, fonts, icons, assets
+  ]
+
+  use kebab-case for dirs *
+
+  in images:
+    use kebab-case for files *
+
+  in fonts:
+    use kebab-case for files *
+
+# ========================================
+#  Testing
+# ========================================
+
+# Allow test files
+allow [
+  **/*.test.{ts,tsx},
+  **/*.spec.{ts,tsx},
+  **/test-utils.{ts,tsx}
+]
+
+# E2E tests
+allow [e2e, tests]
+
+in e2e:
+  use kebab-case for files **/*.{ts,tsx}
+  use kebab-case for dirs *
+
+in tests:
+  use kebab-case for files **/*.{ts,tsx}
+  use kebab-case for dirs *

@@ -1,0 +1,280 @@
+# ========================================
+#  © 2025 Cheez Lin
+#  https://cheez.tech
+#
+#  MIT Licensed
+# ========================================
+
+# ========================================
+#  Django project directory structure
+# ========================================
+# Reference: https://docs.djangoproject.com/en/5.1/intro/tutorial01/
+
+import python
+
+# Must have Django management script
+must have manage.py
+
+# Django standard top-level directories
+allow [
+  # Common Django project structure
+  static, staticfiles, media, templates, locale,
+
+  # Apps directory (optional, for organizing apps)
+  apps,
+
+  # Config/settings directory
+  config, settings,
+
+  # Documentation
+  docs,
+
+  # Scripts
+  scripts
+]
+
+# Django config files
+allow [
+  manage.py,
+  requirements.txt, requirements*.txt,
+  pyproject.toml, setup.py, setup.cfg,
+  Pipfile, Pipfile.lock,
+  poetry.lock,
+  .env.example,
+  Dockerfile, docker-compose.yml,
+  Procfile, runtime.txt,
+  pytest.ini, tox.ini,
+  .coveragerc,
+  mypy.ini, pylintrc
+]
+
+# ========================================
+#  Django project directory (settings)
+# ========================================
+# The main project directory contains settings.py, urls.py, wsgi.py, asgi.py
+
+# Allow common project directory names
+allow [config, core, project, backend, api]
+
+in config:
+  allow [
+    __init__.py,
+    settings.py, settings,
+    urls.py,
+    wsgi.py, asgi.py,
+    celery.py
+  ]
+
+  # Split settings pattern
+  in settings:
+    allow [__init__.py, base.py, local.py, development.py, production.py, staging.py, test.py]
+    use snake_case for files *.py
+
+in core:
+  allow [
+    __init__.py,
+    settings.py, settings,
+    urls.py,
+    wsgi.py, asgi.py,
+    celery.py
+  ]
+
+  in settings:
+    allow [__init__.py, base.py, local.py, development.py, production.py, staging.py, test.py]
+    use snake_case for files *.py
+
+in project:
+  allow [
+    __init__.py,
+    settings.py, settings,
+    urls.py,
+    wsgi.py, asgi.py,
+    celery.py
+  ]
+
+  in settings:
+    allow [__init__.py, base.py, local.py, development.py, production.py, staging.py, test.py]
+    use snake_case for files *.py
+
+# ========================================
+#  Django apps structure
+# ========================================
+# Each Django app should follow this structure
+
+# Common Django app names
+allow [
+  accounts, users, authentication, auth,
+  blog, posts, articles,
+  api, core, common, utils,
+  dashboard, admin,
+  payments, billing,
+  notifications, emails,
+  analytics, reports
+]
+
+# Django app files pattern - applies to all app directories
+# Standard Django app files
+allow [
+  **/models.py, **/views.py, **/urls.py,
+  **/admin.py, **/apps.py, **/forms.py,
+  **/serializers.py, **/signals.py,
+  **/managers.py, **/middleware.py,
+  **/context_processors.py, **/decorators.py,
+  **/permissions.py, **/filters.py,
+  **/validators.py, **/utils.py,
+  **/constants.py, **/choices.py,
+  **/tasks.py, **/celery.py
+]
+
+# Django app directories
+allow [
+  **/migrations, **/templates, **/static,
+  **/tests, **/management, **/templatetags,
+  **/fixtures, **/locale
+]
+
+# ========================================
+#  Migrations
+# ========================================
+
+in **/migrations:
+  allow [__init__.py]
+  # Migration files: 0001_initial.py, 0002_add_field.py
+  use snake_case for files *.py prefix: /^\d{4}_/
+
+# ========================================
+#  Management commands
+# ========================================
+
+in **/management:
+  allow [__init__.py, commands]
+
+  in commands:
+    allow [__init__.py]
+    use snake_case for files *.py
+
+# ========================================
+#  Template tags
+# ========================================
+
+in **/templatetags:
+  allow [__init__.py]
+  use snake_case for files *.py suffix: /_tags\.py$/
+
+# ========================================
+#  Tests
+# ========================================
+
+in **/tests:
+  allow [__init__.py]
+  use snake_case for files *.py prefix: /^test_/
+
+# Allow test files in app root
+allow **/test_*.py
+
+# ========================================
+#  Templates directory
+# ========================================
+
+in templates:
+  use kebab-case for files **/*.html
+  use snake_case for dirs *
+
+# ========================================
+#  Static files
+# ========================================
+
+in static:
+  allow [css, js, images, fonts, icons, vendor]
+
+  in css:
+    use kebab-case for files **/*.{css,scss,sass}
+    use kebab-case for dirs *
+
+  in js:
+    use kebab-case for files **/*.{js,ts}
+    use kebab-case for dirs *
+
+  in images:
+    use kebab-case for dirs *
+
+  in fonts:
+    use kebab-case for dirs *
+
+# ========================================
+#  Media files (user uploads)
+# ========================================
+
+in media:
+  use kebab-case for dirs *
+
+# ========================================
+#  Apps directory (optional organization)
+# ========================================
+
+in apps:
+  # Each subdirectory is a Django app
+  use snake_case for dirs *
+
+  # Apply Django app structure rules to all apps
+  in *:
+    allow [
+      __init__.py,
+      models.py, views.py, urls.py,
+      admin.py, apps.py, forms.py,
+      serializers.py, signals.py,
+      managers.py, middleware.py,
+      context_processors.py, decorators.py,
+      permissions.py, filters.py,
+      validators.py, utils.py,
+      constants.py, choices.py,
+      tasks.py, celery.py,
+      migrations, templates, static,
+      tests, management, templatetags,
+      fixtures, locale
+    ]
+
+    use snake_case for files *.py
+
+# ========================================
+#  Locale (translations)
+# ========================================
+
+in locale:
+  # Language directories (en, es, fr, etc.)
+  allow [en, es, fr, de, it, pt, ja, zh, ko, ar, ru, tr]
+
+  in *:
+    allow [LC_MESSAGES]
+
+    in LC_MESSAGES:
+      allow [*.po, *.mo]
+
+# ========================================
+#  Django REST Framework (if used)
+# ========================================
+
+# Common DRF patterns
+allow [
+  **/serializers, **/viewsets, **/routers,
+  **/pagination.py, **/throttling.py,
+  **/renderers.py, **/parsers.py
+]
+
+in **/serializers:
+  allow [__init__.py]
+  use snake_case for files *.py
+
+in **/viewsets:
+  allow [__init__.py]
+  use snake_case for files *.py
+
+# ========================================
+#  Celery (if used)
+# ========================================
+
+allow [celerybeat-schedule.db]
+
+in **/tasks:
+  allow [__init__.py]
+  use snake_case for files *.py

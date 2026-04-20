@@ -1,0 +1,233 @@
+# ========================================
+#  © 2025 Cheez Lin
+#  https://cheez.tech
+#
+#  MIT Licensed
+# ========================================
+
+# ========================================
+#  Laravel project directory structure
+# ========================================
+# Reference: https://laravel.com/docs/11.x/structure
+
+import basic
+
+# Must have Laravel config files
+must have [composer.json, artisan]
+
+# Laravel standard top-level directories
+allow [
+  # Core Laravel directories
+  app, bootstrap, config, database, public, resources, routes, storage, tests,
+
+  # Package directories
+  packages,
+
+  # Laravel Sail (Docker)
+  docker,
+
+  # Common additional directories
+  lang, stubs
+]
+
+# Laravel config files
+allow [
+  composer.json, composer.lock,
+  artisan, server.php,
+  phpunit.xml, phpunit.xml.dist,
+  .env.example, .env.testing,
+  package.json, package-lock.json,
+  vite.config.js, vite.config.ts,
+  tailwind.config.js, tailwind.config.ts,
+  postcss.config.js,
+  tsconfig.json,
+  docker-compose.yml,
+  Dockerfile,
+  .php-cs-fixer.php, .php-cs-fixer.dist.php,
+  phpstan.neon, phpstan.neon.dist,
+  pint.json
+]
+
+# ========================================
+#  App directory
+# ========================================
+
+in app:
+  # Allow standard Laravel app directories
+  allow [
+    # Core directories
+    Console, Exceptions, Http, Models, Providers,
+
+    # Common additional directories
+    Broadcasting, Events, Jobs, Listeners, Mail, Notifications,
+    Policies, Rules, Services, Traits, Helpers, Support,
+
+    # Domain-driven design
+    Domain, Domains, Modules
+  ]
+
+  # Console commands
+  in Console:
+    allow [Commands, Kernel.php]
+
+    in Commands:
+      use PascalCase for files *.php suffix: /Command\.php$/
+
+  # HTTP layer
+  in Http:
+    allow [Controllers, Middleware, Requests, Resources, Kernel.php]
+
+    in Controllers:
+      use PascalCase for files **/*.php suffix: /Controller\.php$/
+      use PascalCase for dirs *
+
+    in Middleware:
+      use PascalCase for files *.php
+
+    in Requests:
+      use PascalCase for files **/*.php suffix: /Request\.php$/
+      use PascalCase for dirs *
+
+    in Resources:
+      use PascalCase for files **/*.php suffix: /Resource\.php$/
+      use PascalCase for dirs *
+
+  # Models
+  in Models:
+    use PascalCase for files *.php
+    use PascalCase for dirs *
+
+  # Providers
+  in Providers:
+    use PascalCase for files *.php suffix: /ServiceProvider\.php$/
+
+  # Events
+  in Events:
+    use PascalCase for files *.php
+
+  # Jobs
+  in Jobs:
+    use PascalCase for files *.php
+
+  # Listeners
+  in Listeners:
+    use PascalCase for files *.php
+
+  # Mail
+  in Mail:
+    use PascalCase for files *.php
+
+  # Notifications
+  in Notifications:
+    use PascalCase for files *.php
+
+  # Policies
+  in Policies:
+    use PascalCase for files *.php suffix: /Policy\.php$/
+
+  # Rules
+  in Rules:
+    use PascalCase for files *.php
+
+  # Services
+  in Services:
+    use PascalCase for files *.php suffix: /(Service|Manager)\.php$/
+    use PascalCase for dirs *
+
+# ========================================
+#  Config directory
+# ========================================
+
+in config:
+  use kebab-case for files *.php
+
+# ========================================
+#  Database directory
+# ========================================
+
+in database:
+  allow [factories, migrations, seeders]
+
+  in factories:
+    use PascalCase for files *.php suffix: /Factory\.php$/
+
+  in migrations:
+    # Migration files have timestamp prefix: YYYY_MM_DD_HHMMSS_create_users_table.php
+    use snake_case for files *.php prefix: /^\d{4}_\d{2}_\d{2}_\d{6}_/
+
+  in seeders:
+    use PascalCase for files *.php suffix: /Seeder\.php$/
+
+# ========================================
+#  Resources directory
+# ========================================
+
+in resources:
+  allow [views, js, css, sass, scss, lang, fonts, images]
+
+  # Blade views
+  in views:
+    use kebab-case for files **/*.blade.php
+    use kebab-case for dirs *
+
+  # JavaScript/TypeScript
+  in js:
+    use kebab-case, camelCase for files **/*.{js,ts,jsx,tsx,vue}
+    use kebab-case for dirs *
+
+  # CSS/SCSS
+  in css:
+    use kebab-case for files **/*.{css,scss,sass}
+    use kebab-case for dirs *
+
+  in sass:
+    use kebab-case for files **/*.{scss,sass}
+    use kebab-case for dirs *
+
+  in scss:
+    use kebab-case for files **/*.scss
+    use kebab-case for dirs *
+
+# ========================================
+#  Routes directory
+# ========================================
+
+in routes:
+  use kebab-case for files *.php
+  allow [web.php, api.php, console.php, channels.php]
+
+# ========================================
+#  Tests directory
+# ========================================
+
+in tests:
+  allow [Feature, Unit, TestCase.php, CreatesApplication.php]
+
+  in Feature:
+    use PascalCase for files **/*.php suffix: /Test\.php$/
+    use PascalCase for dirs *
+
+  in Unit:
+    use PascalCase for files **/*.php suffix: /Test\.php$/
+    use PascalCase for dirs *
+
+# ========================================
+#  Public directory
+# ========================================
+
+in public:
+  allow [index.php, .htaccess, robots.txt, favicon.ico]
+  allow [css, js, images, fonts, build, storage]
+
+  use kebab-case for dirs *
+
+# ========================================
+#  Lang directory (translations)
+# ========================================
+
+in lang:
+  # Language directories (en, es, fr, etc.)
+  allow [en, es, fr, de, it, pt, ja, zh, ko, ar, ru, tr]
+
+  use kebab-case for files **/*.php
+  use kebab-case for dirs *

@@ -134,8 +134,11 @@ in assets:
 - `js` / `ts`: Common JavaScript/TypeScript patterns.
 - `nextjs`: App router and Page router conventions.
 - `nuxt4`: Nuxt 4 directory structures and dynamic routes.
+- `t3-stack`: T3 Stack (Next.js + tRPC + Prisma + NextAuth + Tailwind).
 - `go`: Standard Go workspace layouts.
 - `python`: PEP 8 and common Python project structures.
+- `django`: Django project structure and app conventions.
+- `laravel`: Laravel directory structure and naming conventions.
 
 ## 🔧 Development
 
