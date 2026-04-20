@@ -1,0 +1,141 @@
+# ========================================
+#  Remix Preset
+# ========================================
+# Remix is a full stack web framework that lets you focus on the
+# user interface and work back through web standards to deliver
+# a fast, slick, and resilient user experience
+#
+# Official docs: https://remix.run
+
+import basic
+import js
+
+# Root-level structure
+allow [
+  app, public, build,
+  remix.config.js, remix.config.ts,
+  tsconfig.json, package.json,
+  README.md, .env.example
+]
+
+# ========================================
+#  App directory - Application code
+# ========================================
+
+in app:
+  # Main entry files
+  allow [entry.client.tsx, entry.server.tsx, root.tsx]
+
+  # Common Remix directories
+  allow [
+    routes, components, styles, utils,
+    lib, hooks, types, models, services,
+    sessions, db
+  ]
+
+  # Routes - File-based routing
+  in routes:
+    use kebab-case for files **/*.tsx
+    use kebab-case for files **/*.ts
+    use kebab-case for dirs *
+
+    # Nested routes use dot notation or folders
+    # e.g., posts.$postId.tsx or posts/$postId/index.tsx
+    allow [_index.tsx, _layout.tsx]
+
+  # Components - React components
+  in components:
+    use PascalCase for files **/*.tsx
+    use kebab-case for dirs *
+
+    # UI components subdirectory
+    in ui:
+      use kebab-case for files **/*.tsx
+
+  # Styles - CSS files
+  in styles:
+    use kebab-case for files **/*.css
+    use kebab-case for dirs *
+
+  # Utils - Utility functions
+  in utils:
+    use camelCase for files **/*.ts
+    use kebab-case for dirs *
+
+  # Lib - Library code
+  in lib:
+    use camelCase for files **/*.ts
+    use kebab-case for dirs *
+
+  # Hooks - Custom React hooks
+  in hooks:
+    use camelCase for files **/*.ts prefix: /^use/
+
+  # Types - TypeScript types
+  in types:
+    use kebab-case for files **/*.ts
+
+  # Models - Data models
+  in models:
+    use kebab-case for files **/*.ts
+
+  # Services - Business logic
+  in services:
+    use kebab-case for files **/*.service.ts
+    use kebab-case for dirs *
+
+  # Sessions - Session management
+  in sessions:
+    use kebab-case for files **/*.ts
+
+  # Database
+  in db:
+    allow [migrations, seeds, schema.prisma]
+    use kebab-case for files **/*.ts
+
+# ========================================
+#  Public directory - Static files
+# ========================================
+
+in public:
+  allow [favicon.ico, robots.txt, images, fonts]
+  use kebab-case for dirs *
+
+# ========================================
+#  Naming conventions
+# ========================================
+
+# Routes - kebab-case with .tsx extension
+use kebab-case for files app/routes/**/*.tsx
+
+# Components - PascalCase
+use PascalCase for files app/components/**/*.tsx
+
+# Hooks - camelCase with 'use' prefix
+use camelCase for files app/hooks/**/*.ts prefix: /^use/
+
+# Utils - camelCase
+use camelCase for files app/utils/**/*.ts
+
+# Styles - kebab-case
+use kebab-case for files app/styles/**/*.css
+
+# ========================================
+#  Required files
+# ========================================
+
+must have [
+  app/root.tsx,
+  app/entry.client.tsx,
+  app/entry.server.tsx,
+  package.json,
+  remix.config.js
+]
+
+# ========================================
+#  Forbidden patterns
+# ========================================
+
+no [build, .cache, node_modules, public/build]
+no [.env, .env.local]
+allow [.env.example, .env.test]

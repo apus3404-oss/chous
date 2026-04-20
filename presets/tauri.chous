@@ -1,0 +1,151 @@
+# ========================================
+#  Tauri Preset
+# ========================================
+# Tauri is a framework for building tiny, fast, and secure desktop
+# applications with web technologies
+#
+# Official docs: https://tauri.app
+
+import basic
+import js
+
+# Root-level structure
+allow [
+  src, src-tauri, dist,
+  tauri.conf.json, vite.config.ts, vite.config.js,
+  tsconfig.json, package.json,
+  README.md, .env.example
+]
+
+# ========================================
+#  Source directory - Frontend code
+# ========================================
+
+in src:
+  # Main frontend files
+  allow [main.tsx, main.ts, App.tsx, index.html]
+
+  # Common frontend directories
+  allow [
+    components, pages, hooks, utils,
+    styles, assets, types, store, api
+  ]
+
+  # Components - UI components
+  in components:
+    use PascalCase for files **/*.tsx
+    use kebab-case for dirs *
+
+  # Pages - Application pages
+  in pages:
+    use PascalCase for files **/*.tsx
+    use kebab-case for dirs *
+
+  # Hooks - Custom React hooks
+  in hooks:
+    use camelCase for files **/*.ts prefix: /^use/
+
+  # Utils - Utility functions
+  in utils:
+    use camelCase for files **/*.ts
+
+  # Styles - CSS files
+  in styles:
+    use kebab-case for files **/*.css
+    use kebab-case for files **/*.scss
+
+  # Assets - Images, fonts, etc.
+  in assets:
+    use kebab-case for dirs *
+
+  # Types - TypeScript types
+  in types:
+    use kebab-case for files **/*.ts
+
+  # Store - State management
+  in store:
+    use kebab-case for files **/*.ts
+
+  # API - Tauri API wrappers
+  in api:
+    use camelCase for files **/*.ts
+
+# ========================================
+#  Src-Tauri directory - Rust backend
+# ========================================
+
+in src-tauri:
+  # Rust source files
+  allow [src, target, Cargo.toml, Cargo.lock, tauri.conf.json, build.rs]
+
+  # Icons
+  allow [icons]
+
+  # Rust source directory
+  in src:
+    allow [main.rs, lib.rs]
+    allow [commands, models, utils, config, database]
+
+    # Commands - Tauri commands (Rust functions callable from frontend)
+    in commands:
+      use snake_case for files **/*.rs
+
+    # Models - Data models
+    in models:
+      use snake_case for files **/*.rs
+
+    # Utils - Utility functions
+    in utils:
+      use snake_case for files **/*.rs
+
+    # Config - Configuration
+    in config:
+      use snake_case for files **/*.rs
+
+    # Database - Local database
+    in database:
+      use snake_case for files **/*.rs
+
+# ========================================
+#  Naming conventions
+# ========================================
+
+# Frontend components - PascalCase
+use PascalCase for files src/components/**/*.tsx
+
+# Frontend hooks - camelCase with 'use' prefix
+use camelCase for files src/hooks/**/*.ts prefix: /^use/
+
+# Frontend utils - camelCase
+use camelCase for files src/utils/**/*.ts
+
+# Rust files - snake_case
+use snake_case for files src-tauri/src/**/*.rs
+
+# ========================================
+#  Required files
+# ========================================
+
+must have [
+  src/main.tsx,
+  src-tauri/src/main.rs,
+  src-tauri/Cargo.toml,
+  src-tauri/tauri.conf.json,
+  package.json
+]
+
+# ========================================
+#  Forbidden patterns
+# ========================================
+
+no [dist, src-tauri/target, node_modules]
+no [.env, .env.local]
+allow [.env.example, .env.test]
+
+# ========================================
+#  Best practices
+# ========================================
+
+# Tauri uses Rust for the backend (snake_case)
+# and web technologies for the frontend (camelCase/PascalCase)
+# Keep frontend and backend code separated

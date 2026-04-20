@@ -1,0 +1,131 @@
+{
+  "name": "chous-vscode",
+  "displayName": "Chous - File Structure Linter",
+  "description": "Real-time file structure linting for VS Code",
+  "version": "0.1.0",
+  "publisher": "chous",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "linter",
+    "file-structure",
+    "architecture",
+    "organization",
+    "chous"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/.chous"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "chous.lint",
+        "title": "Chous: Lint File Structure"
+      },
+      {
+        "command": "chous.fix",
+        "title": "Chous: Auto-Fix Issues"
+      },
+      {
+        "command": "chous.init",
+        "title": "Chous: Initialize Configuration"
+      },
+      {
+        "command": "chous.showOutput",
+        "title": "Chous: Show Output"
+      }
+    ],
+    "configuration": {
+      "title": "Chous",
+      "properties": {
+        "chous.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/disable Chous linting"
+        },
+        "chous.lintOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run linting when files are saved"
+        },
+        "chous.lintOnOpen": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run linting when workspace is opened"
+        },
+        "chous.configPath": {
+          "type": "string",
+          "default": ".chous",
+          "description": "Path to chous configuration file"
+        },
+        "chous.verbose": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show verbose output"
+        },
+        "chous.strict": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable strict mode (fail on warnings)"
+        },
+        "chous.executablePath": {
+          "type": "string",
+          "default": "",
+          "description": "Custom path to chous executable (leave empty to use global installation)"
+        }
+      }
+    },
+    "problemMatchers": [
+      {
+        "name": "chous",
+        "owner": "chous",
+        "fileLocation": "relative",
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./dist/test/runTest.js",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vscode/test-electron": "^2.3.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0",
+    "@vscode/vsce": "^2.19.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apus3404-oss/chous.git",
+    "directory": "vscode-extension"
+  },
+  "bugs": {
+    "url": "https://github.com/apus3404-oss/chous/issues"
+  },
+  "homepage": "https://github.com/apus3404-oss/chous#readme",
+  "license": "MIT"
+}

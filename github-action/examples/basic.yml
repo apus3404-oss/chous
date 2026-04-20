@@ -1,0 +1,29 @@
+name: Lint File Structure
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Lint file structure
+        uses: apus3404-oss/chous/github-action@v1
+        with:
+          config-path: '.chous'
+          verbose: false
+          strict: false
+          auto-fix: false
+          fail-on-error: true
+          comment-on-pr: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}

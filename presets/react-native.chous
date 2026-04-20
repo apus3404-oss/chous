@@ -1,0 +1,170 @@
+# ========================================
+#  React Native Preset
+# ========================================
+# React Native is a framework for building native mobile apps
+# using React and JavaScript
+#
+# Official docs: https://reactnative.dev
+
+import basic
+import js
+
+# Root-level structure
+allow [
+  src, android, ios, __tests__,
+  app.json, babel.config.js, metro.config.js,
+  tsconfig.json, package.json,
+  README.md, .env.example
+]
+
+# ========================================
+#  Source directory - Application code
+# ========================================
+
+in src:
+  # Common React Native directories
+  allow [
+    screens, components, navigation, services,
+    hooks, utils, types, assets, styles,
+    store, api, constants, contexts, theme
+  ]
+
+  # Screens - App screens
+  in screens:
+    use PascalCase for files **/*.tsx
+    use kebab-case for dirs *
+
+    # Each screen can have its own directory
+    in *:
+      allow [index.tsx, styles.ts, types.ts]
+
+  # Components - Reusable components
+  in components:
+    use PascalCase for files **/*.tsx
+    use kebab-case for dirs *
+
+    # Each component in its own directory
+    in *:
+      allow [index.tsx, styles.ts, types.ts]
+
+  # Navigation - Navigation configuration
+  in navigation:
+    use PascalCase for files **/*.tsx
+    use kebab-case for dirs *
+
+  # Services - API and business logic
+  in services:
+    use camelCase for files **/*.ts
+    use kebab-case for dirs *
+
+  # Hooks - Custom React hooks
+  in hooks:
+    use camelCase for files **/*.ts prefix: /^use/
+
+  # Utils - Utility functions
+  in utils:
+    use camelCase for files **/*.ts
+    use kebab-case for dirs *
+
+  # Types - TypeScript types
+  in types:
+    use kebab-case for files **/*.ts
+
+  # Assets - Images, fonts, etc.
+  in assets:
+    allow [images, fonts, icons, animations]
+    use kebab-case for dirs *
+
+  # Styles - Global styles and theme
+  in styles:
+    use camelCase for files **/*.ts
+
+  # Store - State management (Redux, Zustand, etc.)
+  in store:
+    allow [slices, actions, reducers, selectors]
+    use kebab-case for files **/*.ts
+    use kebab-case for dirs *
+
+  # API - API client and endpoints
+  in api:
+    use camelCase for files **/*.ts
+    use kebab-case for dirs *
+
+  # Constants - App constants
+  in constants:
+    use SCREAMING_SNAKE_CASE, camelCase for files **/*.ts
+
+  # Contexts - React contexts
+  in contexts:
+    use PascalCase for files **/*.tsx
+
+  # Theme - Theme configuration
+  in theme:
+    use camelCase for files **/*.ts
+
+# ========================================
+#  Test directory
+# ========================================
+
+in __tests__:
+  use kebab-case for files **/*.test.tsx
+  use kebab-case for files **/*.test.ts
+
+# ========================================
+#  Android directory
+# ========================================
+
+in android:
+  allow [app, gradle, build.gradle, settings.gradle]
+
+# ========================================
+#  iOS directory
+# ========================================
+
+in ios:
+  allow [Podfile, Podfile.lock]
+  use PascalCase for dirs *
+
+# ========================================
+#  Naming conventions
+# ========================================
+
+# Screens - PascalCase
+use PascalCase for files src/screens/**/*.tsx
+
+# Components - PascalCase
+use PascalCase for files src/components/**/*.tsx
+
+# Navigation - PascalCase
+use PascalCase for files src/navigation/**/*.tsx
+
+# Hooks - camelCase with 'use' prefix
+use camelCase for files src/hooks/**/*.ts prefix: /^use/
+
+# Services - camelCase
+use camelCase for files src/services/**/*.ts
+
+# Utils - camelCase
+use camelCase for files src/utils/**/*.ts
+
+# Test files - kebab-case
+use kebab-case for files **/*.test.tsx
+use kebab-case for files **/*.test.ts
+
+# ========================================
+#  Required files
+# ========================================
+
+must have [
+  package.json,
+  app.json,
+  babel.config.js
+]
+
+# ========================================
+#  Forbidden patterns
+# ========================================
+
+no [node_modules, android/build, ios/build, .expo]
+no [.env, .env.local]
+allow [.env.example, .env.test]

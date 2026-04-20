@@ -1,0 +1,143 @@
+# ========================================
+#  Fastify Preset
+# ========================================
+# Fastify is a fast and low overhead web framework for Node.js
+#
+# Official docs: https://fastify.dev
+
+import basic
+import js
+
+# Root-level structure
+allow [
+  src, test, dist,
+  package.json, tsconfig.json,
+  README.md, .env.example
+]
+
+# ========================================
+#  Source directory - Application code
+# ========================================
+
+in src:
+  # Main application files
+  allow [index.ts, app.ts, server.ts]
+
+  # Common Fastify directories
+  allow [
+    routes, plugins, services, models,
+    schemas, controllers, middleware,
+    utils, types, config, db, hooks
+  ]
+
+  # Routes - API endpoints
+  in routes:
+    use kebab-case for files **/*.ts
+    use kebab-case for dirs *
+
+    # Each route can have its own directory
+    in *:
+      allow [index.ts, schema.ts, handler.ts]
+
+  # Plugins - Fastify plugins
+  in plugins:
+    use kebab-case for files **/*.ts
+
+  # Services - Business logic
+  in services:
+    use kebab-case for files **/*.service.ts
+    use kebab-case for dirs *
+
+  # Models - Data models
+  in models:
+    use kebab-case for files **/*.model.ts
+    use PascalCase for files **/*.ts
+
+  # Schemas - JSON schemas for validation
+  in schemas:
+    use kebab-case for files **/*.schema.ts
+    use kebab-case for dirs *
+
+  # Controllers - Request handlers
+  in controllers:
+    use kebab-case for files **/*.controller.ts
+    use kebab-case for dirs *
+
+  # Middleware - Custom middleware
+  in middleware:
+    use kebab-case for files **/*.ts
+
+  # Hooks - Fastify hooks
+  in hooks:
+    use kebab-case for files **/*.ts
+
+  # Utils - Utility functions
+  in utils:
+    use camelCase for files **/*.ts
+    use kebab-case for dirs *
+
+  # Types - TypeScript types
+  in types:
+    use kebab-case for files **/*.ts
+
+  # Config - Configuration
+  in config:
+    use kebab-case for files **/*.ts
+
+  # Database
+  in db:
+    allow [migrations, seeds, models]
+    use kebab-case for files **/*.ts
+
+# ========================================
+#  Test directory
+# ========================================
+
+in test:
+  allow [unit, integration, fixtures, helpers]
+
+  in unit:
+    use kebab-case for files **/*.test.ts
+
+  in integration:
+    use kebab-case for files **/*.test.ts
+
+  in fixtures:
+    use kebab-case for files **/*.ts
+
+# ========================================
+#  Naming conventions
+# ========================================
+
+# Route files
+use kebab-case for files src/routes/**/*.ts
+
+# Plugin files
+use kebab-case for files src/plugins/**/*.ts
+
+# Service files
+use kebab-case for files src/services/**/*.ts
+
+# Schema files
+use kebab-case for files src/schemas/**/*.ts
+
+# Test files
+use kebab-case for files **/*.test.ts
+
+# ========================================
+#  Required files
+# ========================================
+
+must have [
+  src/app.ts,
+  package.json,
+  tsconfig.json
+]
+
+# ========================================
+#  Forbidden patterns
+# ========================================
+
+no [dist, build, node_modules]
+no [.env, .env.local]
+allow [.env.example, .env.test]

@@ -1,0 +1,199 @@
+# ========================================
+#  NestJS Preset
+# ========================================
+# NestJS is a progressive Node.js framework for building efficient,
+# reliable and scalable server-side applications.
+#
+# Official docs: https://nestjs.com
+
+import basic
+import js
+
+# Root-level structure
+allow [
+  src, test, dist,
+  nest-cli.json, tsconfig.json, tsconfig.build.json,
+  package.json, README.md, .env.example
+]
+
+# ========================================
+#  Source directory - Application code
+# ========================================
+
+in src:
+  # Main application file
+  allow [main.ts, app.module.ts, app.controller.ts, app.service.ts]
+
+  # Common NestJS directories
+  allow [
+    modules, controllers, services, providers,
+    entities, dto, interfaces, decorators,
+    guards, interceptors, pipes, filters,
+    middleware, config, database, common,
+    auth, users, health
+  ]
+
+  # Modules - Feature modules
+  in modules:
+    use kebab-case for dirs *
+
+    in *:
+      allow [*.module.ts, *.controller.ts, *.service.ts]
+      allow [dto, entities, interfaces, guards, decorators]
+
+      # DTOs (Data Transfer Objects)
+      in dto:
+        use kebab-case for files **/*.dto.ts
+
+      # Entities (Database models)
+      in entities:
+        use kebab-case for files **/*.entity.ts
+
+      # Interfaces
+      in interfaces:
+        use kebab-case for files **/*.interface.ts
+
+  # Controllers - HTTP request handlers
+  in controllers:
+    use kebab-case for files **/*.controller.ts
+    use kebab-case for dirs *
+
+  # Services - Business logic
+  in services:
+    use kebab-case for files **/*.service.ts
+    use kebab-case for dirs *
+
+  # Providers - Injectable services
+  in providers:
+    use kebab-case for files **/*.provider.ts
+    use kebab-case for dirs *
+
+  # Entities - Database models (TypeORM/Prisma)
+  in entities:
+    use kebab-case for files **/*.entity.ts
+
+  # DTOs - Data Transfer Objects
+  in dto:
+    use kebab-case for files **/*.dto.ts
+    allow [create-*.dto.ts, update-*.dto.ts]
+
+  # Interfaces - TypeScript interfaces
+  in interfaces:
+    use kebab-case for files **/*.interface.ts
+
+  # Decorators - Custom decorators
+  in decorators:
+    use kebab-case for files **/*.decorator.ts
+
+  # Guards - Route guards
+  in guards:
+    use kebab-case for files **/*.guard.ts
+
+  # Interceptors - Request/response interceptors
+  in interceptors:
+    use kebab-case for files **/*.interceptor.ts
+
+  # Pipes - Validation pipes
+  in pipes:
+    use kebab-case for files **/*.pipe.ts
+
+  # Filters - Exception filters
+  in filters:
+    use kebab-case for files **/*.filter.ts
+
+  # Middleware - HTTP middleware
+  in middleware:
+    use kebab-case for files **/*.middleware.ts
+
+  # Config - Configuration files
+  in config:
+    use kebab-case for files **/*.config.ts
+
+  # Database - Database configuration
+  in database:
+    allow [migrations, seeds, factories]
+    use kebab-case for files **/*.ts
+
+  # Common - Shared utilities
+  in common:
+    allow [constants, enums, helpers, utils, types]
+    use kebab-case for files **/*.ts
+
+# ========================================
+#  Test directory - Unit & E2E tests
+# ========================================
+
+in test:
+  allow [unit, e2e, fixtures, jest-e2e.json]
+
+  # Unit tests (co-located with source files also allowed)
+  in unit:
+    use kebab-case for files **/*.spec.ts
+
+  # E2E tests
+  in e2e:
+    use kebab-case for files **/*.e2e-spec.ts
+
+# ========================================
+#  Naming conventions
+# ========================================
+
+# Controllers - kebab-case with .controller.ts suffix
+use kebab-case for files **/*.controller.ts
+
+# Services - kebab-case with .service.ts suffix
+use kebab-case for files **/*.service.ts
+
+# Modules - kebab-case with .module.ts suffix
+use kebab-case for files **/*.module.ts
+
+# DTOs - kebab-case with .dto.ts suffix
+use kebab-case for files **/*.dto.ts
+
+# Entities - kebab-case with .entity.ts suffix
+use kebab-case for files **/*.entity.ts
+
+# Guards - kebab-case with .guard.ts suffix
+use kebab-case for files **/*.guard.ts
+
+# Interceptors - kebab-case with .interceptor.ts suffix
+use kebab-case for files **/*.interceptor.ts
+
+# Pipes - kebab-case with .pipe.ts suffix
+use kebab-case for files **/*.pipe.ts
+
+# Filters - kebab-case with .filter.ts suffix
+use kebab-case for files **/*.filter.ts
+
+# Decorators - kebab-case with .decorator.ts suffix
+use kebab-case for files **/*.decorator.ts
+
+# Interfaces - kebab-case with .interface.ts suffix
+use kebab-case for files **/*.interface.ts
+
+# Test files - kebab-case with .spec.ts or .e2e-spec.ts suffix
+use kebab-case for files **/*.spec.ts
+use kebab-case for files **/*.e2e-spec.ts
+
+# ========================================
+#  Required files
+# ========================================
+
+must have [
+  src/main.ts,
+  src/app.module.ts,
+  package.json,
+  tsconfig.json,
+  nest-cli.json
+]
+
+# ========================================
+#  Forbidden patterns
+# ========================================
+
+# No build artifacts
+no [dist, build]
+
+# No environment files (use .env.example)
+no [.env, .env.local, .env.production]
+allow [.env.example, .env.test]

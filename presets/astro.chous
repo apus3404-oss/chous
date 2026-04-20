@@ -1,0 +1,141 @@
+# ========================================
+#  Astro Preset
+# ========================================
+# Astro is a modern static site builder that delivers lightning-fast
+# performance with a modern developer experience
+#
+# Official docs: https://astro.build
+
+import basic
+import js
+
+# Root-level structure
+allow [
+  src, public, dist,
+  astro.config.mjs, astro.config.ts,
+  tsconfig.json, package.json,
+  README.md
+]
+
+# ========================================
+#  Source directory - Application code
+# ========================================
+
+in src:
+  # Common Astro directories
+  allow [
+    pages, layouts, components, content,
+    styles, assets, lib, utils, types,
+    middleware, env.d.ts
+  ]
+
+  # Pages - File-based routing
+  in pages:
+    use kebab-case for files **/*.astro
+    use kebab-case for files **/*.md
+    use kebab-case for files **/*.mdx
+    use kebab-case for dirs *
+
+    # API routes
+    in api:
+      use kebab-case for files **/*.ts
+      use kebab-case for files **/*.js
+
+  # Layouts - Page layouts
+  in layouts:
+    use PascalCase for files **/*.astro
+    use kebab-case for dirs *
+
+  # Components - Reusable components
+  in components:
+    use PascalCase for files **/*.astro
+    use PascalCase for files **/*.tsx
+    use PascalCase for files **/*.vue
+    use PascalCase for files **/*.svelte
+    use kebab-case for dirs *
+
+  # Content - Content collections
+  in content:
+    use kebab-case for dirs *
+    use kebab-case for files **/*.md
+    use kebab-case for files **/*.mdx
+
+    # Config file
+    allow [config.ts, config.js]
+
+  # Styles - Global styles
+  in styles:
+    use kebab-case for files **/*.css
+    use kebab-case for files **/*.scss
+    use kebab-case for dirs *
+
+  # Assets - Static assets (images, fonts, etc.)
+  in assets:
+    use kebab-case for dirs *
+
+  # Lib - Library code
+  in lib:
+    use camelCase for files **/*.ts
+    use kebab-case for dirs *
+
+  # Utils - Utility functions
+  in utils:
+    use camelCase for files **/*.ts
+    use kebab-case for dirs *
+
+  # Types - TypeScript types
+  in types:
+    use kebab-case for files **/*.ts
+
+  # Middleware - Astro middleware
+  in middleware:
+    use kebab-case for files **/*.ts
+
+# ========================================
+#  Public directory - Static files
+# ========================================
+
+in public:
+  use kebab-case for dirs *
+  use kebab-case for files *
+
+# ========================================
+#  Naming conventions
+# ========================================
+
+# Pages - kebab-case
+use kebab-case for files src/pages/**/*.astro
+use kebab-case for files src/pages/**/*.md
+
+# Layouts - PascalCase
+use PascalCase for files src/layouts/**/*.astro
+
+# Components - PascalCase
+use PascalCase for files src/components/**/*.astro
+
+# API routes - kebab-case
+use kebab-case for files src/pages/api/**/*.ts
+
+# Content - kebab-case
+use kebab-case for files src/content/**/*.md
+
+# Styles - kebab-case
+use kebab-case for files src/styles/**/*.css
+
+# ========================================
+#  Required files
+# ========================================
+
+must have [
+  src/pages/index.astro,
+  package.json,
+  astro.config.mjs
+]
+
+# ========================================
+#  Forbidden patterns
+# ========================================
+
+no [dist, .astro, node_modules]
+no [.env, .env.local]
+allow [.env.example, .env.test]

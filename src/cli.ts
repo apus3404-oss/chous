@@ -22,6 +22,7 @@ import { stat } from "node:fs/promises";
 import { APP_NAME, APP_CONFIG_FILE_NAME } from "./constants";
 import ignore from "ignore";
 import { compare } from "compare-versions";
+import chokidar from "chokidar";
 
 // Read version from package.json
 const __filename = fileURLToPath(import.meta.url);
@@ -39,6 +40,7 @@ type CliOptions = {
   color: boolean;
   help: boolean;
   strict: boolean;
+  watch: boolean; // Watch mode: monitor file changes and re-run linting
   statsOutput?: string; // Output rule performance statistics to JSON file
   filePaths?: string[]; // File paths from lint-staged or similar tools
   dryRun?: boolean; // For fix command: preview changes without applying
@@ -67,7 +69,7 @@ function detectLangArg(argv: string[]): string | undefined {
 
 function parseArgs(argv: string[], LL: TranslationFunctions): CliOptions {
   const defaultColor = Boolean(process.stdout.isTTY) && process.env.NO_COLOR == null;
-  const opts: CliOptions = { command: "lint", cwd: process.cwd(), verbose: false, color: defaultColor, help: false, strict: false };
+  const opts: CliOptions = { command: "lint", cwd: process.cwd(), verbose: false, color: defaultColor, help: false, strict: false, watch: false };
   const filePaths: string[] = [];
   
   for (let i = 0; i < argv.length; i++) {
@@ -94,6 +96,7 @@ function parseArgs(argv: string[], LL: TranslationFunctions): CliOptions {
     if (a === "--help" || a === "-h") opts.help = true;
     else if (a === "--verbose" || a === "-v") opts.verbose = true;
     else if (a === "--strict" || a === "-s") opts.strict = true;
+    else if (a === "--watch" || a === "-w") opts.watch = true;
     else if (a === "--dry-run" || a === "-d") opts.dryRun = true;
     else if (a === "--yes" || a === "-y") opts.yes = true;
     else if (a === "--stats-output") {
@@ -151,6 +154,7 @@ ${String(LL.cli.help.commands())}
 ${String(LL.cli.help.options())}
   -c, --config <path>  ${String(LL.cli.help.configHint())}
   -v, --verbose        ${String(LL.cli.help.verboseHint())}
+  -w, --watch          Watch for file changes and re-run linting
   -l, --lang <code>    ${String(LL.cli.help.langHint())}
   -s, --strict         ${String(LL.cli.help.strictHint())}
   -d, --dry-run        Preview fixes without applying (fix command only)
@@ -795,13 +799,13 @@ async function main() {
     const allIssues: any[] = [];
 
     for (const config of configs) {
-      const roots = await resolveWorkspaceRoots(config.where, opts.cwd, configPath);
+      const configDir = dirname(configPath);
+      const roots = await resolveWorkspaceRoots({ cwd: opts.cwd, configDir, where: config.where });
       for (const root of roots) {
         const result = await lintWorkspace({
           root,
           config,
           configPath,
-          verbose: opts.verbose,
           strict: opts.strict,
         });
         allIssues.push(...result.issues);
@@ -812,7 +816,7 @@ async function main() {
     const fixableIssues = extractFixableIssues(allIssues, opts.cwd);
 
     if (fixableIssues.length === 0) {
-      console.log(c.success("✓ No fixable issues found"));
+      console.log(c.green("✓ No fixable issues found"));
       process.exitCode = 0;
       return;
     }
@@ -821,35 +825,35 @@ async function main() {
     const { safe, unsafe } = validateFixes(fixableIssues);
 
     if (unsafe.length > 0) {
-      console.log(c.warn(`\n⚠ ${unsafe.length} issue(s) cannot be fixed automatically (target exists or unsafe)`));
+      console.log(c.yellow(`\n⚠ ${unsafe.length} issue(s) cannot be fixed automatically (target exists or unsafe)`));
     }
 
     if (safe.length === 0) {
-      console.log(c.warn("✗ No safe fixes available"));
+      console.log(c.yellow("✗ No safe fixes available"));
       process.exitCode = 1;
       return;
     }
 
     // Show preview
     console.log(formatFixPreview(safe, opts.cwd));
-    console.log(c.info(`\n${safe.length} issue(s) can be fixed automatically`));
+    console.log(c.cyan(`\n${safe.length} issue(s) can be fixed automatically`));
 
     // Dry-run mode: just show preview
     if (opts.dryRun) {
-      console.log(c.info("\n[Dry-run mode] No changes applied"));
+      console.log(c.cyan("\n[Dry-run mode] No changes applied"));
       process.exitCode = 0;
       return;
     }
 
     // Ask for confirmation unless --yes flag
     if (!opts.yes) {
-      console.log(c.warn("\nApply these fixes? (y/N): "));
+      console.log(c.yellow("\nApply these fixes? (y/N): "));
       const answer = await new Promise<string>((resolve) => {
         stdin.once("data", (data) => resolve(data.toString().trim()));
       });
 
       if (answer.toLowerCase() !== "y" && answer.toLowerCase() !== "yes") {
-        console.log(c.info("Aborted"));
+        console.log(c.cyan("Aborted"));
         process.exitCode = 0;
         return;
       }
@@ -865,13 +869,13 @@ async function main() {
 
     // Report results
     if (fixResult.fixed.length > 0) {
-      console.log(c.success(`\n✓ Fixed ${fixResult.fixed.length} issue(s)`));
+      console.log(c.green(`\n✓ Fixed ${fixResult.fixed.length} issue(s)`));
     }
 
     if (fixResult.errors.length > 0) {
-      console.log(c.error(`\n✗ ${fixResult.errors.length} error(s) occurred:`));
+      console.log(c.red(`\n✗ ${fixResult.errors.length} error(s) occurred:`));
       for (const err of fixResult.errors) {
-        console.log(c.error(`  ${err.issue.displayPath}: ${err.error}`));
+        console.log(c.red(`  ${err.issue.displayPath}: ${err.error}`));
       }
       process.exitCode = 1;
       return;
@@ -1137,6 +1141,100 @@ async function main() {
   }
 
   const overallExit = await runConfigGroup(actualConfigPath, false, isAutoDetected ? raw : undefined);
+
+  // Watch mode: monitor file changes and re-run linting
+  if (opts.watch) {
+    console.log(c.cyan("\n👀 Watching for file changes... (Press Ctrl+C to stop)"));
+
+    // Debounce timer to avoid running lint too frequently
+    let debounceTimer: NodeJS.Timeout | null = null;
+    const DEBOUNCE_DELAY = 300; // ms
+
+    // Track if linting is in progress
+    let isLinting = false;
+
+    const runLint = async () => {
+      if (isLinting) return;
+      isLinting = true;
+
+      try {
+        console.clear();
+        console.log(c.cyan(`\n🔄 Re-running lint... (${new Date().toLocaleTimeString()})\n`));
+
+        // Re-read config in case it changed
+        let currentRaw: string;
+        try {
+          currentRaw = readFileSync(actualConfigPath, "utf8");
+        } catch {
+          console.error(c.red("✗ Config file not found or unreadable"));
+          isLinting = false;
+          return;
+        }
+
+        // Reset visited configs for fresh run
+        visitedConfigs.clear();
+        visitedConfigRoot.clear();
+        totalFileCount = 0;
+
+        await runConfigGroup(actualConfigPath, false, isAutoDetected ? currentRaw : undefined);
+      } catch (err) {
+        console.error(c.red(`✗ Error during linting: ${err instanceof Error ? err.message : String(err)}`));
+      } finally {
+        isLinting = false;
+      }
+    };
+
+    const debouncedLint = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(runLint, DEBOUNCE_DELAY);
+    };
+
+    // Watch patterns - ignore common directories
+    const ignorePatterns = [
+      '**/node_modules/**',
+      '**/.git/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/.next/**',
+      '**/.nuxt/**',
+      '**/coverage/**',
+      '**/.cache/**',
+      '**/.turbo/**',
+    ];
+
+    const watcher = chokidar.watch(opts.cwd, {
+      ignored: ignorePatterns,
+      persistent: true,
+      ignoreInitial: true,
+      awaitWriteFinish: {
+        stabilityThreshold: 100,
+        pollInterval: 50,
+      },
+    });
+
+    watcher
+      .on('add', (path) => {
+        if (opts.verbose) console.log(c.dim(`  + ${relative(opts.cwd, path)}`));
+        debouncedLint();
+      })
+      .on('unlink', (path) => {
+        if (opts.verbose) console.log(c.dim(`  - ${relative(opts.cwd, path)}`));
+        debouncedLint();
+      })
+      .on('change', (path) => {
+        // Only re-lint if config file changed
+        if (path.endsWith(APP_CONFIG_FILE_NAME)) {
+          if (opts.verbose) console.log(c.dim(`  ~ ${relative(opts.cwd, path)}`));
+          debouncedLint();
+        }
+      })
+      .on('error', (error) => {
+        console.error(c.red(`Watcher error: ${error.message}`));
+      });
+
+    // Keep process alive
+    await new Promise(() => {});
+  }
 
   process.exitCode = overallExit;
 }

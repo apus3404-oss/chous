@@ -42,6 +42,13 @@
 
 This enhanced fork includes major improvements and new features:
 
+### 👀 Watch Mode (NEW!)
+```bash
+chous --watch          # Monitor file changes and auto re-lint
+chous -w --verbose     # Watch mode with detailed output
+```
+Real-time linting! Watch mode monitors your project and automatically re-runs linting when files are added, removed, or when the config changes.
+
 ### ⚡ Auto-Fix Command (NEW!)
 ```bash
 chous fix              # Automatically fix move and rename issues
@@ -57,10 +64,12 @@ No more manual file moving! Let `chous` fix your structure automatically.
 - **Microservices** - Multiple independent services
 - **Library** - NPM package structure
 
-### 🎯 New Framework Support (NEW!)
-- **Laravel** - PHP framework with MVC structure
-- **Django** - Python web framework
-- **T3 Stack** - Modern TypeScript full-stack
+### 🎯 19 Framework Presets (NEW!)
+**Backend**: NestJS, Fastify, Hono, Laravel, Django
+**Frontend**: Astro, Remix, SvelteKit, Next.js, Nuxt 4, T3 Stack
+**Mobile**: React Native, Flutter
+**Desktop**: Electron, Tauri
+**Languages**: Go, Python, JavaScript, TypeScript
 
 ### 🧪 Production-Ready Quality (NEW!)
 - **85%+ test coverage** (up from ~10%)
@@ -69,10 +78,17 @@ No more manual file moving! Let `chous` fix your structure automatically.
 - **Automated security updates** via Dependabot
 - **Code coverage reporting** via Codecov
 
-### 📖 Comprehensive Documentation (NEW!)
-- [CONTRIBUTING.md](CONTRIBUTING.md) - Detailed contribution guide
-- Development setup instructions
-- Examples with best practices
+### 💻 VS Code Extension (NEW!)
+Real-time linting in your editor with inline diagnostics, quick fixes, and status bar integration.
+
+### 🚀 GitHub Action (NEW!)
+CI/CD integration with automatic PR comments, auto-fix support, and status checks.
+
+### 🔌 Plugin System (NEW!)
+Extend Chous with custom rules, presets, and validators. Build your own plugins!
+
+### 📖 Documentation Website (NEW!)
+Comprehensive documentation site with guides, API reference, and examples at [docs/](docs/)
 
 ---
 
@@ -102,14 +118,19 @@ Are you a **Vibe Coder** using AI editors? Use this 5-step workflow to let the A
 
 ## ✨ Key Features
 
-- **🔧 Auto-Fix Command**: Automatically fix file structure issues with `chous fix` - no more manual moving!
-- **📚 Ready-to-Use Examples**: 4 production-ready configs for monorepo, full-stack, microservices, and libraries
-- **🎯 Extended Framework Support**: Laravel, Django, T3 Stack, Next.js, Nuxt 4, Go, Python, and more
-- **🧪 Production-Ready**: 85%+ test coverage with 140+ test cases for reliability
+- **👀 Watch Mode**: Real-time linting with automatic re-runs on file changes
+- **🔧 Auto-Fix Command**: Automatically fix file structure issues - no more manual moving!
+- **💻 VS Code Extension**: Real-time linting in your editor with inline diagnostics
+- **🚀 GitHub Action**: CI/CD integration with PR comments and auto-fix support
+- **🔌 Plugin System**: Extend with custom rules, presets, and validators
+- **📚 Ready-to-Use Examples**: 4 production-ready configs for common architectures
+- **🎯 19 Framework Presets**: Built-in support for popular frameworks and languages
+- **📖 Documentation Website**: Comprehensive docs with guides and API reference
+- **🧪 Production-Ready**: 85%+ test coverage with 140+ test cases
 - **⚡ Fast CI/CD**: Optimized builds with dependency caching (2-3x faster)
-- **🔒 Automated Security**: Dependabot integration for automatic dependency updates
-- **📊 Coverage Reporting**: Codecov integration for test coverage visibility
-- **Expressive DSL**: A human-readable language designed specifically for file systems
+- **🔒 Automated Security**: Dependabot integration for dependency updates
+- **📊 Coverage Reporting**: Codecov integration for visibility
+- **Expressive DSL**: Human-readable language designed for file systems
 - **Nested Blocks**: Group rules naturally with `in <dir>: ...` syntax
 - **AI Editor Integration**: Native hooks for **Cursor**, providing real-time feedback as you code
 - **Elegant Reporting**: Beautiful, tree-style terminal reports that pinpoint exact inconsistencies
@@ -151,6 +172,7 @@ npm install -g chous
 chous                    # Lint your project structure
 chous --verbose          # Show detailed output
 chous --strict           # Strict mode (fail on warnings)
+chous --watch            # Watch mode: auto re-lint on file changes (NEW!)
 
 # Auto-Fix (NEW!)
 chous fix                # Automatically fix move/rename issues

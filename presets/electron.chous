@@ -1,0 +1,159 @@
+# ========================================
+#  Electron Preset
+# ========================================
+# Electron is a framework for building cross-platform desktop applications
+# with JavaScript, HTML, and CSS
+#
+# Official docs: https://www.electronjs.org
+
+import basic
+import js
+
+# Root-level structure
+allow [
+  src, dist, build, out,
+  electron-builder.yml, forge.config.js,
+  tsconfig.json, package.json,
+  README.md, .env.example
+]
+
+# ========================================
+#  Source directory - Application code
+# ========================================
+
+in src:
+  # Main process files
+  allow [main, preload, renderer]
+
+  # Main process - Node.js backend
+  in main:
+    allow [index.ts, main.ts]
+    allow [
+      windows, menus, ipc, services,
+      utils, config, database
+    ]
+
+    # Windows - Window management
+    in windows:
+      use kebab-case for files **/*.ts
+
+    # Menus - Application menus
+    in menus:
+      use kebab-case for files **/*.ts
+
+    # IPC - Inter-process communication
+    in ipc:
+      use kebab-case for files **/*.ts
+
+    # Services - Business logic
+    in services:
+      use kebab-case for files **/*.ts
+
+    # Utils - Utility functions
+    in utils:
+      use camelCase for files **/*.ts
+
+    # Config - Configuration
+    in config:
+      use kebab-case for files **/*.ts
+
+    # Database - Local database
+    in database:
+      use kebab-case for files **/*.ts
+
+  # Preload scripts - Bridge between main and renderer
+  in preload:
+    allow [index.ts, preload.ts]
+    use kebab-case for files **/*.ts
+
+  # Renderer process - Frontend (React, Vue, etc.)
+  in renderer:
+    allow [index.html, index.tsx, index.ts, App.tsx]
+    allow [
+      components, pages, hooks, utils,
+      styles, assets, types, store, api
+    ]
+
+    # Components - UI components
+    in components:
+      use PascalCase for files **/*.tsx
+      use kebab-case for dirs *
+
+    # Pages - Application pages
+    in pages:
+      use PascalCase for files **/*.tsx
+      use kebab-case for dirs *
+
+    # Hooks - Custom React hooks
+    in hooks:
+      use camelCase for files **/*.ts prefix: /^use/
+
+    # Utils - Utility functions
+    in utils:
+      use camelCase for files **/*.ts
+
+    # Styles - CSS/SCSS files
+    in styles:
+      use kebab-case for files **/*.css
+      use kebab-case for files **/*.scss
+
+    # Assets - Images, fonts, etc.
+    in assets:
+      use kebab-case for dirs *
+
+    # Types - TypeScript types
+    in types:
+      use kebab-case for files **/*.ts
+
+    # Store - State management
+    in store:
+      use kebab-case for files **/*.ts
+
+    # API - API client
+    in api:
+      use camelCase for files **/*.ts
+
+# ========================================
+#  Build directory - Build configuration
+# ========================================
+
+in build:
+  allow [icon.png, icon.ico, icon.icns]
+  use kebab-case for files *
+
+# ========================================
+#  Naming conventions
+# ========================================
+
+# Main process - kebab-case
+use kebab-case for files src/main/**/*.ts
+
+# Preload scripts - kebab-case
+use kebab-case for files src/preload/**/*.ts
+
+# Renderer components - PascalCase
+use PascalCase for files src/renderer/components/**/*.tsx
+
+# Renderer hooks - camelCase with 'use' prefix
+use camelCase for files src/renderer/hooks/**/*.ts prefix: /^use/
+
+# Renderer utils - camelCase
+use camelCase for files src/renderer/utils/**/*.ts
+
+# ========================================
+#  Required files
+# ========================================
+
+must have [
+  src/main/index.ts,
+  src/renderer/index.html,
+  package.json
+]
+
+# ========================================
+#  Forbidden patterns
+# ========================================
+
+no [dist, out, build/Release, node_modules]
+no [.env, .env.local]
+allow [.env.example, .env.test]

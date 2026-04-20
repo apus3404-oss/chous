@@ -1,0 +1,37 @@
+name: Lint and Auto-Fix
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-fix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Lint and fix file structure
+        uses: apus3404-oss/chous/github-action@v1
+        with:
+          auto-fix: true
+          comment-on-pr: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit and push fixes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add -A
+          if ! git diff --quiet --staged; then
+            git commit -m "chore: auto-fix file structure issues"
+            git push
+          else
+            echo "No changes to commit"
+          fi

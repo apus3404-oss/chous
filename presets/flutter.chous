@@ -1,0 +1,152 @@
+# ========================================
+#  Flutter Preset
+# ========================================
+# Flutter is Google's UI toolkit for building beautiful, natively
+# compiled applications for mobile, web, and desktop from a single codebase
+#
+# Official docs: https://flutter.dev
+
+import basic
+
+# Root-level structure
+allow [
+  lib, test, android, ios, web, linux, macos, windows,
+  assets, fonts,
+  pubspec.yaml, pubspec.lock, analysis_options.yaml,
+  README.md, .env.example
+]
+
+# ========================================
+#  Lib directory - Application code
+# ========================================
+
+in lib:
+  # Main entry point
+  allow [main.dart]
+
+  # Common Flutter directories
+  allow [
+    screens, widgets, models, services,
+    providers, controllers, utils, constants,
+    routes, theme, config, data, domain, presentation
+  ]
+
+  # Screens - App screens
+  in screens:
+    use snake_case for files **/*.dart
+    use snake_case for dirs *
+
+  # Widgets - Reusable widgets
+  in widgets:
+    use snake_case for files **/*.dart
+    use snake_case for dirs *
+
+  # Models - Data models
+  in models:
+    use snake_case for files **/*.dart
+
+  # Services - Business logic and API calls
+  in services:
+    use snake_case for files **/*.dart
+    use snake_case for dirs *
+
+  # Providers - State management (Provider, Riverpod, etc.)
+  in providers:
+    use snake_case for files **/*.dart
+
+  # Controllers - GetX or other controllers
+  in controllers:
+    use snake_case for files **/*.dart
+
+  # Utils - Utility functions
+  in utils:
+    use snake_case for files **/*.dart
+
+  # Constants - App constants
+  in constants:
+    use snake_case for files **/*.dart
+
+  # Routes - Navigation routes
+  in routes:
+    use snake_case for files **/*.dart
+
+  # Theme - App theme configuration
+  in theme:
+    use snake_case for files **/*.dart
+
+  # Config - Configuration files
+  in config:
+    use snake_case for files **/*.dart
+
+  # Clean Architecture structure (optional)
+  in data:
+    allow [models, repositories, datasources]
+    use snake_case for files **/*.dart
+
+  in domain:
+    allow [entities, repositories, usecases]
+    use snake_case for files **/*.dart
+
+  in presentation:
+    allow [screens, widgets, providers, controllers]
+    use snake_case for files **/*.dart
+
+# ========================================
+#  Test directory
+# ========================================
+
+in test:
+  allow [unit, widget, integration, fixtures]
+
+  in unit:
+    use snake_case for files **/*_test.dart
+
+  in widget:
+    use snake_case for files **/*_test.dart
+
+  in integration:
+    use snake_case for files **/*_test.dart
+
+# ========================================
+#  Assets directory
+# ========================================
+
+in assets:
+  allow [images, icons, animations, data]
+  use kebab-case for dirs *
+
+# ========================================
+#  Naming conventions
+# ========================================
+
+# Dart files - snake_case
+use snake_case for files lib/**/*.dart
+
+# Test files - snake_case with _test.dart suffix
+use snake_case for files test/**/*_test.dart
+
+# ========================================
+#  Required files
+# ========================================
+
+must have [
+  lib/main.dart,
+  pubspec.yaml,
+  README.md
+]
+
+# ========================================
+#  Forbidden patterns
+# ========================================
+
+no [build, .dart_tool, .flutter-plugins, .flutter-plugins-dependencies]
+no [.env, .env.local]
+allow [.env.example, .env.test]
+
+# ========================================
+#  Best practices
+# ========================================
+
+# Flutter follows snake_case for file names
+# Classes use PascalCase but files use snake_case
+# Example: class MyWidget in file my_widget.dart

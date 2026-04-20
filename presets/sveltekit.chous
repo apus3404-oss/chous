@@ -1,0 +1,133 @@
+# ========================================
+#  SvelteKit Preset
+# ========================================
+# SvelteKit is a framework for building web applications of all sizes,
+# with a beautiful development experience and flexible filesystem-based routing
+#
+# Official docs: https://kit.svelte.dev
+
+import basic
+import js
+
+# Root-level structure
+allow [
+  src, static, build,
+  svelte.config.js, vite.config.ts, vite.config.js,
+  tsconfig.json, package.json,
+  README.md, .env.example
+]
+
+# ========================================
+#  Source directory - Application code
+# ========================================
+
+in src:
+  # Main app file
+  allow [app.html, app.d.ts, app.css]
+
+  # Common SvelteKit directories
+  allow [
+    routes, lib, params, hooks.server.ts, hooks.client.ts
+  ]
+
+  # Routes - File-based routing
+  in routes:
+    use kebab-case for files **/*.svelte
+    use kebab-case for files **/*.ts
+    use kebab-case for files **/*.js
+    use kebab-case for dirs *
+
+    # Special files
+    allow [
+      +page.svelte, +page.ts, +page.js, +page.server.ts, +page.server.js,
+      +layout.svelte, +layout.ts, +layout.js, +layout.server.ts, +layout.server.js,
+      +error.svelte, +server.ts, +server.js
+    ]
+
+  # Lib - Shared code
+  in lib:
+    allow [
+      components, utils, stores, types,
+      server, assets, styles
+    ]
+
+    # Components - Svelte components
+    in components:
+      use PascalCase for files **/*.svelte
+      use kebab-case for dirs *
+
+    # Utils - Utility functions
+    in utils:
+      use camelCase for files **/*.ts
+      use kebab-case for dirs *
+
+    # Stores - Svelte stores
+    in stores:
+      use camelCase for files **/*.ts
+
+    # Types - TypeScript types
+    in types:
+      use kebab-case for files **/*.ts
+
+    # Server - Server-only code
+    in server:
+      use kebab-case for files **/*.ts
+      use kebab-case for dirs *
+
+    # Styles - Global styles
+    in styles:
+      use kebab-case for files **/*.css
+      use kebab-case for files **/*.scss
+
+  # Params - Route parameter matchers
+  in params:
+    use camelCase for files **/*.ts
+
+# ========================================
+#  Static directory - Static files
+# ========================================
+
+in static:
+  allow [favicon.png, robots.txt, images, fonts]
+  use kebab-case for dirs *
+
+# ========================================
+#  Naming conventions
+# ========================================
+
+# Route pages - +page.svelte
+use kebab-case for files src/routes/**/+page.svelte
+
+# Route layouts - +layout.svelte
+use kebab-case for files src/routes/**/+layout.svelte
+
+# Components - PascalCase
+use PascalCase for files src/lib/components/**/*.svelte
+
+# Stores - camelCase
+use camelCase for files src/lib/stores/**/*.ts
+
+# Utils - camelCase
+use camelCase for files src/lib/utils/**/*.ts
+
+# Server code - kebab-case
+use kebab-case for files src/lib/server/**/*.ts
+
+# ========================================
+#  Required files
+# ========================================
+
+must have [
+  src/app.html,
+  src/routes/+page.svelte,
+  package.json,
+  svelte.config.js
+]
+
+# ========================================
+#  Forbidden patterns
+# ========================================
+
+no [build, .svelte-kit, node_modules]
+no [.env, .env.local]
+allow [.env.example, .env.test]

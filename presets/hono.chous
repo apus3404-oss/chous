@@ -1,0 +1,108 @@
+# ========================================
+#  Hono Preset
+# ========================================
+# Hono is a small, simple, and ultrafast web framework for
+# Cloudflare Workers, Deno, Bun, and Node.js
+#
+# Official docs: https://hono.dev
+
+import basic
+import js
+
+# Root-level structure
+allow [
+  src, test, dist,
+  package.json, tsconfig.json,
+  wrangler.toml, README.md
+]
+
+# ========================================
+#  Source directory - Application code
+# ========================================
+
+in src:
+  # Main application file
+  allow [index.ts, app.ts]
+
+  # Common Hono directories
+  allow [
+    routes, middleware, handlers, utils,
+    types, validators, services, models,
+    lib, config
+  ]
+
+  # Routes - API endpoints
+  in routes:
+    use kebab-case for files **/*.ts
+    use kebab-case for dirs *
+
+  # Middleware - Custom middleware
+  in middleware:
+    use kebab-case for files **/*.ts
+
+  # Handlers - Request handlers
+  in handlers:
+    use kebab-case for files **/*.ts
+    use kebab-case for dirs *
+
+  # Validators - Request validation
+  in validators:
+    use kebab-case for files **/*.ts
+
+  # Services - Business logic
+  in services:
+    use kebab-case for files **/*.service.ts
+    use kebab-case for dirs *
+
+  # Models - Data models
+  in models:
+    use kebab-case for files **/*.ts
+
+  # Utils - Utility functions
+  in utils:
+    use camelCase for files **/*.ts
+
+  # Types - TypeScript types
+  in types:
+    use kebab-case for files **/*.ts
+
+  # Config - Configuration
+  in config:
+    use kebab-case for files **/*.ts
+
+# ========================================
+#  Test directory
+# ========================================
+
+in test:
+  allow [unit, integration, fixtures]
+
+  in unit:
+    use kebab-case for files **/*.test.ts
+
+  in integration:
+    use kebab-case for files **/*.test.ts
+
+# ========================================
+#  Naming conventions
+# ========================================
+
+use kebab-case for files src/**/*.ts
+use kebab-case for files **/*.test.ts
+
+# ========================================
+#  Required files
+# ========================================
+
+must have [
+  src/index.ts,
+  package.json
+]
+
+# ========================================
+#  Forbidden patterns
+# ========================================
+
+no [dist, build, node_modules, .wrangler]
+no [.env, .env.local]
+allow [.env.example, .env.test]

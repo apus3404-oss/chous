@@ -1,0 +1,56 @@
+name: 'Chous File Structure Linter'
+description: 'Lint your project file structure with Chous'
+author: 'Chous'
+branding:
+  icon: 'folder'
+  color: 'blue'
+
+inputs:
+  config-path:
+    description: 'Path to .chous configuration file'
+    required: false
+    default: '.chous'
+
+  verbose:
+    description: 'Enable verbose output'
+    required: false
+    default: 'false'
+
+  strict:
+    description: 'Enable strict mode (fail on warnings)'
+    required: false
+    default: 'false'
+
+  auto-fix:
+    description: 'Automatically fix issues'
+    required: false
+    default: 'false'
+
+  fail-on-error:
+    description: 'Fail the action if issues are found'
+    required: false
+    default: 'true'
+
+  comment-on-pr:
+    description: 'Comment on PR with linting results'
+    required: false
+    default: 'true'
+
+  github-token:
+    description: 'GitHub token for PR comments (defaults to GITHUB_TOKEN)'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  issues-found:
+    description: 'Number of issues found'
+
+  has-errors:
+    description: 'Whether errors were found (true/false)'
+
+  summary:
+    description: 'Summary of linting results'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
