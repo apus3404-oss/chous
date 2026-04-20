@@ -6,6 +6,7 @@ import { parseFsLintConfig, parseFsLintConfigGroups } from "./config/parser";
 import { lintWorkspace } from "./rules/lint";
 import { renderReport } from "./rules/report";
 import { writeStatsJson } from "./rules/stats";
+import { extractFixableIssues, applyFixes, formatFixPreview, validateFixes } from "./rules/fix";
 import { createColorizer } from "./color";
 import { formatIssueMessage } from "./rules/report";
 import { getLL } from "./i18n/runtime";
@@ -29,7 +30,7 @@ const packageJson = JSON.parse(readFileSync(resolve(__dirname, "../package.json"
 const VERSION = packageJson.version;
 
 type CliOptions = {
-  command: "lint" | "init" | "cursor";
+  command: "lint" | "init" | "cursor" | "fix";
   cursorSubcommand?: "after-edit" | "stop" | "install";
   cwd: string;
   configPath?: string;
@@ -40,6 +41,8 @@ type CliOptions = {
   strict: boolean;
   statsOutput?: string; // Output rule performance statistics to JSON file
   filePaths?: string[]; // File paths from lint-staged or similar tools
+  dryRun?: boolean; // For fix command: preview changes without applying
+  yes?: boolean; // For fix command: skip confirmation prompts
 };
 
 // Cursor hooks JSON types
@@ -70,9 +73,13 @@ function parseArgs(argv: string[], LL: TranslationFunctions): CliOptions {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (!a) continue;
-    
+
     if (a === "init") {
       opts.command = "init";
+      continue;
+    }
+    if (a === "fix") {
+      opts.command = "fix";
       continue;
     }
     if (a === "cursor") {
@@ -87,6 +94,8 @@ function parseArgs(argv: string[], LL: TranslationFunctions): CliOptions {
     if (a === "--help" || a === "-h") opts.help = true;
     else if (a === "--verbose" || a === "-v") opts.verbose = true;
     else if (a === "--strict" || a === "-s") opts.strict = true;
+    else if (a === "--dry-run" || a === "-d") opts.dryRun = true;
+    else if (a === "--yes" || a === "-y") opts.yes = true;
     else if (a === "--stats-output") {
       const path = argv[i + 1];
       if (!path) throw new Error(String(LL.cli.error.missingStatsOutputValue()));
@@ -134,14 +143,18 @@ function printHelp(LL: TranslationFunctions): void {
     `${APP_NAME}
 
 ${String(LL.cli.help.commands())}
-  init                  ${String(LL.cli.help.initCmdDesc())}
-  cursor install        ${String(LL.cli.help.installCursorHookDesc())}
+  chous                 Lint your project structure
+  chous fix             Auto-fix move and rename issues
+  chous init            ${String(LL.cli.help.initCmdDesc())}
+  chous cursor install  ${String(LL.cli.help.installCursorHookDesc())}
 
 ${String(LL.cli.help.options())}
   -c, --config <path>  ${String(LL.cli.help.configHint())}
   -v, --verbose        ${String(LL.cli.help.verboseHint())}
   -l, --lang <code>    ${String(LL.cli.help.langHint())}
   -s, --strict         ${String(LL.cli.help.strictHint())}
+  -d, --dry-run        Preview fixes without applying (fix command only)
+  -y, --yes            Skip confirmation prompts (fix command only)
   --stats-output <path> ${String(LL.cli.help.statsHint())}
   --no-color           ${String(LL.cli.help.noColorHint())}
   -h, --help           ${String(LL.cli.help.helpHint())}
@@ -754,6 +767,118 @@ async function main() {
       await handleCursorHook(opts.cursorSubcommand, opts, LL, lang);
       return;
     }
+  }
+
+  // Handle fix command
+  if (opts.command === "fix") {
+    // First, run linting to get issues
+    const c = createColorizer({ enabled: opts.color });
+
+    let raw: string;
+    try {
+      raw = readFileSync(configPath, "utf8");
+    } catch {
+      const autoDetected = findAutoDetectedPresetPath(opts.cwd);
+      if (autoDetected.presetPath) {
+        raw = readFileSync(autoDetected.presetPath, "utf8");
+        if (!raw.match(/^\[where:/m)) {
+          raw = "[where:cwd]\n" + raw;
+        }
+      } else {
+        console.error(String(LL.cli.error.cannotReadRulesFile({ path: configPath })));
+        process.exitCode = 2;
+        return;
+      }
+    }
+
+    const configs = parseFsLintConfigGroups(raw, configPath);
+    const allIssues: any[] = [];
+
+    for (const config of configs) {
+      const roots = await resolveWorkspaceRoots(config.where, opts.cwd, configPath);
+      for (const root of roots) {
+        const result = await lintWorkspace({
+          root,
+          config,
+          configPath,
+          verbose: opts.verbose,
+          strict: opts.strict,
+        });
+        allIssues.push(...result.issues);
+      }
+    }
+
+    // Extract fixable issues
+    const fixableIssues = extractFixableIssues(allIssues, opts.cwd);
+
+    if (fixableIssues.length === 0) {
+      console.log(c.success("✓ No fixable issues found"));
+      process.exitCode = 0;
+      return;
+    }
+
+    // Validate fixes
+    const { safe, unsafe } = validateFixes(fixableIssues);
+
+    if (unsafe.length > 0) {
+      console.log(c.warn(`\n⚠ ${unsafe.length} issue(s) cannot be fixed automatically (target exists or unsafe)`));
+    }
+
+    if (safe.length === 0) {
+      console.log(c.warn("✗ No safe fixes available"));
+      process.exitCode = 1;
+      return;
+    }
+
+    // Show preview
+    console.log(formatFixPreview(safe, opts.cwd));
+    console.log(c.info(`\n${safe.length} issue(s) can be fixed automatically`));
+
+    // Dry-run mode: just show preview
+    if (opts.dryRun) {
+      console.log(c.info("\n[Dry-run mode] No changes applied"));
+      process.exitCode = 0;
+      return;
+    }
+
+    // Ask for confirmation unless --yes flag
+    if (!opts.yes) {
+      console.log(c.warn("\nApply these fixes? (y/N): "));
+      const answer = await new Promise<string>((resolve) => {
+        stdin.once("data", (data) => resolve(data.toString().trim()));
+      });
+
+      if (answer.toLowerCase() !== "y" && answer.toLowerCase() !== "yes") {
+        console.log(c.info("Aborted"));
+        process.exitCode = 0;
+        return;
+      }
+    }
+
+    // Apply fixes
+    const fixResult = await applyFixes(safe, {
+      root: opts.cwd,
+      dryRun: false,
+      verbose: opts.verbose,
+      interactive: false,
+    });
+
+    // Report results
+    if (fixResult.fixed.length > 0) {
+      console.log(c.success(`\n✓ Fixed ${fixResult.fixed.length} issue(s)`));
+    }
+
+    if (fixResult.errors.length > 0) {
+      console.log(c.error(`\n✗ ${fixResult.errors.length} error(s) occurred:`));
+      for (const err of fixResult.errors) {
+        console.log(c.error(`  ${err.issue.displayPath}: ${err.error}`));
+      }
+      process.exitCode = 1;
+      return;
+    }
+
+    process.exitCode = 0;
+    return;
   }
 
   // Extract relevant directories from file paths (for lint-staged optimization)
