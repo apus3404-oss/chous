@@ -1,0 +1,222 @@
+# ========================================
+#  NPM Library/Package Example
+# ========================================
+# This example shows how to structure a reusable NPM package/library
+# that can be published and used by other projects
+
+import basic
+
+# Root-level library structure
+allow [
+  src, dist, tests, examples, docs,
+  package.json, tsconfig.json, tsconfig.build.json,
+  README.md, LICENSE, CHANGELOG.md,
+  .npmignore, .npmrc
+]
+
+# Build tools and configs
+allow [
+  rollup.config.js, vite.config.ts, vitest.config.ts,
+  jest.config.js, babel.config.js,
+  .eslintrc.json, .prettierrc,
+  tsup.config.ts, unbuild.config.ts
+]
+
+# ========================================
+#  Source directory - Library code
+# ========================================
+
+in src:
+  # Main entry point
+  allow [index.ts, index.tsx]
+
+  # Common library directories
+  allow [
+    components, hooks, utils, types,
+    constants, helpers, core, lib
+  ]
+
+  # Components (for UI libraries)
+  in components:
+    use PascalCase for files **/*.{tsx,ts}
+    use kebab-case for dirs *
+
+    # Each component in its own directory
+    in *:
+      allow [index.tsx, index.ts, types.ts, styles.ts, *.test.tsx]
+
+  # Custom hooks (for React libraries)
+  in hooks:
+    use camelCase for files **/*.ts prefix: /^use/
+    allow [**/*.test.ts]
+
+  # Utility functions
+  in utils:
+    use camelCase for files **/*.ts
+    use kebab-case for dirs *
+    allow [**/*.test.ts]
+
+  # TypeScript types and interfaces
+  in types:
+    use kebab-case for files **/*.ts
+
+  # Constants
+  in constants:
+    use SCREAMING_SNAKE_CASE, camelCase for files **/*.ts
+
+  # Core library logic
+  in core:
+    use camelCase for files **/*.ts
+    use kebab-case for dirs *
+
+# ========================================
+#  Tests directory - Unit & integration tests
+# ========================================
+
+in tests:
+  allow [unit, integration, e2e, fixtures, helpers, setup.ts]
+
+  # Unit tests
+  in unit:
+    use kebab-case for files **/*.test.{ts,tsx}
+    use kebab-case for dirs *
+
+  # Integration tests
+  in integration:
+    use kebab-case for files **/*.test.{ts,tsx}
+    use kebab-case for dirs *
+
+  # E2E tests
+  in e2e:
+    use kebab-case for files **/*.test.{ts,tsx}
+
+  # Test fixtures
+  in fixtures:
+    use kebab-case for files **/*.{ts,json}
+
+  # Test helpers
+  in helpers:
+    use camelCase for files **/*.ts
+
+# ========================================
+#  Examples directory - Usage examples
+# ========================================
+
+in examples:
+  # Allow different framework examples
+  allow [
+    basic, react, vue, svelte, nextjs,
+    node, browser, typescript
+  ]
+
+  # Each example is a mini-project
+  in *:
+    allow [
+      src, public, index.html, index.ts,
+      package.json, tsconfig.json,
+      README.md
+    ]
+
+    use kebab-case for files **/*.{ts,tsx,js,jsx}
+    use kebab-case for dirs *
+
+# ========================================
+#  Docs directory - Documentation
+# ========================================
+
+in docs:
+  allow [
+    api, guides, examples, assets,
+    index.md, getting-started.md
+  ]
+
+  # API documentation
+  in api:
+    use kebab-case for files **/*.md
+
+  # User guides
+  in guides:
+    use kebab-case for files **/*.md
+
+  # Documentation assets
+  in assets:
+    use kebab-case for dirs *
+
+# ========================================
+#  Distribution rules
+# ========================================
+
+# Dist directory structure (generated)
+in dist:
+  allow [
+    index.js, index.mjs, index.cjs,
+    index.d.ts, index.d.mts, index.d.cts,
+    *.js, *.mjs, *.cjs,
+    *.d.ts, *.d.mts, *.d.cts
+  ]
+
+# ========================================
+#  Package.json requirements
+# ========================================
+
+# Must have essential package files
+must have [
+  package.json,
+  README.md,
+  LICENSE,
+  tsconfig.json
+]
+
+# ========================================
+#  Naming conventions
+# ========================================
+
+# Source files - camelCase or PascalCase
+use camelCase, PascalCase for files src/**/*.{ts,tsx}
+
+# Test files - kebab-case with .test or .spec suffix
+use kebab-case for files **/*.{test,spec}.{ts,tsx}
+
+# Config files - kebab-case
+use kebab-case for files *.config.{js,ts,mjs}
+
+# ========================================
+#  Forbidden patterns
+# ========================================
+
+# No build artifacts in source control
+no [dist, build, .turbo, .cache]
+
+# No environment files
+no [.env, .env.local]
+allow [.env.example]
+
+# No OS-specific files
+no [.DS_Store, Thumbs.db, desktop.ini]
+
+# No editor-specific files (except .vscode for shared settings)
+no [.idea, *.swp, *.swo, *~]
+
+# No lock files for libraries (let consumers choose)
+# Note: Comment out if you want to commit lock files
+# no [package-lock.json, yarn.lock, pnpm-lock.yaml]
+
+# ========================================
+#  Best practices
+# ========================================
+
+# Organize by feature, not by file type
+# Good: src/user-manager/index.ts, src/user-manager/types.ts
+# Bad:  src/managers/user.ts, src/types/user.ts
+
+# Keep components self-contained
+# Each component directory should have:
+# - index.tsx (component)
+# - types.ts (types)
+# - *.test.tsx (tests)
+# - styles.ts (styles, if needed)
+
+# Export everything through index.ts
+# Users should import from the package root:
+# import { Component } from 'my-library'
+# Not: import { Component } from 'my-library/dist/components/Component'

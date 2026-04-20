@@ -1,0 +1,121 @@
+# ========================================
+#  Monorepo Example - Turborepo/Nx Style
+# ========================================
+# This example shows how to structure a monorepo with multiple apps and packages
+# Reference: https://turbo.build/repo/docs/handbook/workspaces
+
+import basic
+
+# Root-level monorepo structure
+allow [
+  apps, packages, tooling,
+  turbo.json, pnpm-workspace.yaml,
+  package.json, tsconfig.json
+]
+
+# ========================================
+#  Apps directory - Frontend & Backend apps
+# ========================================
+
+in apps:
+  # Allow standard app directories
+  allow [web, mobile, docs, api, admin]
+
+  # Each app should follow its own structure
+  in web:
+    import nextjs
+
+  in mobile:
+    # React Native structure
+    allow [src, android, ios, app.json, metro.config.js]
+
+    in src:
+      allow [components, screens, navigation, hooks, utils, assets]
+      use PascalCase for files **/*.{tsx,ts}
+      use kebab-case for dirs *
+
+  in api:
+    # Node.js API structure
+    allow [src, tests, prisma]
+
+    in src:
+      allow [routes, controllers, services, middleware, utils, types]
+      use kebab-case for files **/*.ts
+      use kebab-case for dirs *
+
+  in docs:
+    # Documentation site (Nextra/Docusaurus)
+    allow [pages, components, public, theme.config.tsx]
+    use kebab-case for files **/*.{md,mdx}
+
+# ========================================
+#  Packages directory - Shared libraries
+# ========================================
+
+in packages:
+  # Allow standard package directories
+  allow [ui, config, tsconfig, eslint-config, utils, types]
+
+  # UI component library
+  in ui:
+    allow [src, dist, package.json, tsconfig.json]
+
+    in src:
+      allow [components, hooks, utils, styles, types]
+      use PascalCase for files **/components/**/*.{tsx,ts}
+      use camelCase for files **/hooks/**/*.ts prefix: /^use/
+      use kebab-case for dirs *
+
+  # Shared TypeScript configs
+  in tsconfig:
+    allow [base.json, nextjs.json, react-library.json, package.json]
+
+  # Shared ESLint configs
+  in eslint-config:
+    allow [library.js, next.js, react-internal.js, package.json]
+
+  # Shared utilities
+  in utils:
+    allow [src, dist, package.json, tsconfig.json]
+
+    in src:
+      use camelCase for files **/*.ts
+      use kebab-case for dirs *
+
+  # Shared TypeScript types
+  in types:
+    allow [src, dist, package.json, tsconfig.json]
+
+    in src:
+      use kebab-case for files **/*.ts
+
+# ========================================
+#  Tooling directory - Build tools & scripts
+# ========================================
+
+in tooling:
+  allow [scripts, github, docker]
+
+  in scripts:
+    use kebab-case for files **/*.{js,ts,sh}
+
+  in github:
+    allow [workflows, actions]
+    use kebab-case for files **/*.{yml,yaml}
+
+# ========================================
+#  Workspace-level rules
+# ========================================
+
+# All packages must have package.json
+must have [
+  apps/*/package.json,
+  packages/*/package.json
+]
+
+# Consistent naming across workspace
+use kebab-case for dirs apps/*
+use kebab-case for dirs packages/*
+
+# No nested node_modules (use workspace hoisting)
+no **/node_modules

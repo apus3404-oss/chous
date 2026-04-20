@@ -1,0 +1,197 @@
+# ========================================
+#  Full-Stack Application Example
+# ========================================
+# This example shows a typical full-stack app structure with separate
+# frontend (React/Next.js) and backend (Node.js/Express) directories
+
+import basic
+
+# Root-level structure
+allow [
+  frontend, backend, shared,
+  docker-compose.yml, .env.example,
+  README.md, LICENSE
+]
+
+# ========================================
+#  Frontend - React/Next.js Application
+# ========================================
+
+in frontend:
+  import nextjs
+
+  # Additional frontend-specific directories
+  allow [
+    src, public, tests, cypress,
+    next.config.js, tailwind.config.js,
+    package.json, tsconfig.json
+  ]
+
+  in src:
+    allow [
+      app, components, lib, hooks, utils,
+      styles, types, constants, contexts,
+      api, services
+    ]
+
+    # Components - PascalCase or kebab-case
+    in components:
+      use PascalCase, kebab-case for files **/*.{tsx,ts}
+      use kebab-case for dirs *
+
+      # UI components subdirectory
+      in ui:
+        use kebab-case for files **/*.tsx
+
+    # Custom hooks - camelCase with 'use' prefix
+    in hooks:
+      use camelCase for files **/*.ts prefix: /^use/
+
+    # API client functions
+    in api:
+      use camelCase for files **/*.ts
+      use kebab-case for dirs *
+
+    # Service layer
+    in services:
+      use camelCase for files **/*.ts suffix: /Service\.ts$/
+
+    # Utilities
+    in utils:
+      use camelCase, kebab-case for files **/*.ts
+
+    # TypeScript types
+    in types:
+      use kebab-case for files **/*.ts
+
+  # E2E tests
+  in cypress:
+    allow [e2e, fixtures, support]
+
+    in e2e:
+      use kebab-case for files **/*.cy.ts
+
+# ========================================
+#  Backend - Node.js/Express API
+# ========================================
+
+in backend:
+  allow [
+    src, tests, prisma, migrations,
+    package.json, tsconfig.json,
+    .env.example, Dockerfile
+  ]
+
+  in src:
+    allow [
+      routes, controllers, services, models,
+      middleware, utils, types, config,
+      validators, jobs, websockets
+    ]
+
+    # Routes - RESTful API endpoints
+    in routes:
+      use kebab-case for files **/*.ts
+      use kebab-case for dirs *
+
+    # Controllers - Handle HTTP requests
+    in controllers:
+      use kebab-case for files **/*.controller.ts
+      use kebab-case for dirs *
+
+    # Services - Business logic
+    in services:
+      use kebab-case for files **/*.service.ts
+      use kebab-case for dirs *
+
+    # Models - Database models
+    in models:
+      use PascalCase for files **/*.model.ts
+      use kebab-case for dirs *
+
+    # Middleware
+    in middleware:
+      use kebab-case for files **/*.middleware.ts
+
+    # Validators - Request validation
+    in validators:
+      use kebab-case for files **/*.validator.ts
+
+    # Background jobs
+    in jobs:
+      use kebab-case for files **/*.job.ts
+
+    # WebSocket handlers
+    in websockets:
+      use kebab-case for files **/*.handler.ts
+
+    # Utilities
+    in utils:
+      use camelCase, kebab-case for files **/*.ts
+
+    # Configuration
+    in config:
+      use kebab-case for files **/*.ts
+
+  # Database schema (Prisma)
+  in prisma:
+    allow [schema.prisma, seed.ts, migrations]
+
+  # Tests
+  in tests:
+    allow [unit, integration, e2e, fixtures]
+
+    in unit:
+      use kebab-case for files **/*.test.ts
+
+    in integration:
+      use kebab-case for files **/*.test.ts
+
+    in e2e:
+      use kebab-case for files **/*.test.ts
+
+# ========================================
+#  Shared - Code shared between frontend & backend
+# ========================================
+
+in shared:
+  allow [types, constants, utils, validators]
+
+  # Shared TypeScript types
+  in types:
+    use kebab-case for files **/*.ts
+
+  # Shared constants
+  in constants:
+    use SCREAMING_SNAKE_CASE for files **/*.ts
+
+  # Shared utilities
+  in utils:
+    use camelCase for files **/*.ts
+
+  # Shared validators (Zod schemas)
+  in validators:
+    use kebab-case for files **/*.ts
+
+# ========================================
+#  Project-wide rules
+# ========================================
+
+# Required files
+must have [
+  frontend/package.json,
+  backend/package.json,
+  README.md
+]
+
+# No build artifacts in source control
+no [
+  frontend/dist,
+  frontend/.next,
+  backend/dist,
+  **/node_modules
+]
+
+# Environment files should be examples only
+no [.env, .env.local]
+allow [.env.example, .env.test]

@@ -1,0 +1,264 @@
+# ========================================
+#  Microservices Architecture Example
+# ========================================
+# This example shows a microservices-based architecture with multiple
+# independent services, shared libraries, and infrastructure code
+
+import basic
+
+# Root-level structure
+allow [
+  services, libs, infrastructure, scripts,
+  docker-compose.yml, docker-compose.dev.yml,
+  README.md, LICENSE
+]
+
+# ========================================
+#  Services - Independent microservices
+# ========================================
+
+in services:
+  # Allow standard service directories
+  allow [
+    auth-service, user-service, order-service,
+    payment-service, notification-service,
+    api-gateway
+  ]
+
+  # Auth Service - Authentication & Authorization
+  in auth-service:
+    allow [src, tests, prisma, Dockerfile, package.json]
+
+    in src:
+      allow [
+        controllers, services, models, middleware,
+        utils, types, config, routes
+      ]
+
+      use kebab-case for files **/*.ts
+      use kebab-case for dirs *
+
+    in tests:
+      use kebab-case for files **/*.test.ts
+
+  # User Service - User management
+  in user-service:
+    allow [src, tests, prisma, Dockerfile, package.json]
+
+    in src:
+      allow [
+        controllers, services, models, middleware,
+        utils, types, config, routes, events
+      ]
+
+      use kebab-case for files **/*.ts
+      use kebab-case for dirs *
+
+    in tests:
+      use kebab-case for files **/*.test.ts
+
+  # Order Service - Order processing
+  in order-service:
+    allow [src, tests, prisma, Dockerfile, package.json]
+
+    in src:
+      allow [
+        controllers, services, models, middleware,
+        utils, types, config, routes, events, jobs
+      ]
+
+      use kebab-case for files **/*.ts
+      use kebab-case for dirs *
+
+    in tests:
+      use kebab-case for files **/*.test.ts
+
+  # Payment Service - Payment processing
+  in payment-service:
+    allow [src, tests, prisma, Dockerfile, package.json]
+
+    in src:
+      allow [
+        controllers, services, models, middleware,
+        utils, types, config, routes, webhooks
+      ]
+
+      use kebab-case for files **/*.ts
+      use kebab-case for dirs *
+
+    in tests:
+      use kebab-case for files **/*.test.ts
+
+  # Notification Service - Email/SMS/Push notifications
+  in notification-service:
+    allow [src, tests, templates, Dockerfile, package.json]
+
+    in src:
+      allow [
+        services, models, utils, types,
+        config, consumers, templates
+      ]
+
+      use kebab-case for files **/*.ts
+      use kebab-case for dirs *
+
+    in templates:
+      use kebab-case for files **/*.{html,mjml}
+
+    in tests:
+      use kebab-case for files **/*.test.ts
+
+  # API Gateway - Entry point for all services
+  in api-gateway:
+    allow [src, tests, Dockerfile, package.json]
+
+    in src:
+      allow [
+        routes, middleware, utils, types,
+        config, proxy, rate-limiting
+      ]
+
+      use kebab-case for files **/*.ts
+      use kebab-case for dirs *
+
+    in tests:
+      use kebab-case for files **/*.test.ts
+
+# ========================================
+#  Libs - Shared libraries across services
+# ========================================
+
+in libs:
+  allow [
+    common, database, messaging, logging,
+    validation, auth, types
+  ]
+
+  # Common utilities
+  in common:
+    allow [src, tests, package.json, tsconfig.json]
+
+    in src:
+      use camelCase for files **/*.ts
+      use kebab-case for dirs *
+
+  # Database utilities (Prisma client, migrations)
+  in database:
+    allow [src, prisma, package.json]
+
+    in src:
+      use kebab-case for files **/*.ts
+
+  # Messaging (RabbitMQ/Kafka clients)
+  in messaging:
+    allow [src, tests, package.json]
+
+    in src:
+      allow [publishers, consumers, types]
+      use kebab-case for files **/*.ts
+
+  # Logging utilities
+  in logging:
+    allow [src, package.json]
+
+    in src:
+      use camelCase for files **/*.ts
+
+  # Validation schemas (Zod/Joi)
+  in validation:
+    allow [src, package.json]
+
+    in src:
+      use kebab-case for files **/*.ts
+
+  # Auth utilities (JWT, OAuth)
+  in auth:
+    allow [src, tests, package.json]
+
+    in src:
+      use camelCase for files **/*.ts
+
+  # Shared TypeScript types
+  in types:
+    allow [src, package.json]
+
+    in src:
+      use kebab-case for files **/*.ts
+
+# ========================================
+#  Infrastructure - Deployment & DevOps
+# ========================================
+
+in infrastructure:
+  allow [
+    kubernetes, terraform, helm, monitoring,
+    scripts
+  ]
+
+  # Kubernetes manifests
+  in kubernetes:
+    allow [base, overlays]
+
+    in base:
+      use kebab-case for files **/*.{yaml,yml}
+
+    in overlays:
+      allow [dev, staging, production]
+      use kebab-case for files **/*.{yaml,yml}
+
+  # Terraform infrastructure as code
+  in terraform:
+    allow [modules, environments]
+
+    in modules:
+      use kebab-case for dirs *
+      use kebab-case for files **/*.tf
+
+    in environments:
+      allow [dev, staging, production]
+      use kebab-case for files **/*.tf
+
+  # Helm charts
+  in helm:
+    use kebab-case for dirs *
+    use kebab-case for files **/*.{yaml,yml}
+
+  # Monitoring (Prometheus, Grafana)
+  in monitoring:
+    allow [prometheus, grafana, alerts]
+    use kebab-case for files **/*.{yaml,yml,json}
+
+# ========================================
+#  Scripts - Automation scripts
+# ========================================
+
+in scripts:
+  allow [deploy, migrate, seed, backup]
+  use kebab-case for files **/*.{sh,js,ts}
+
+# ========================================
+#  Project-wide rules
+# ========================================
+
+# Each service must have these files
+must have [
+  services/*/package.json,
+  services/*/Dockerfile,
+  services/*/README.md
+]
+
+# No build artifacts
+no [
+  **/dist,
+  **/build,
+  **/node_modules,
+  **/.next
+]
+
+# No environment files (use secrets management)
+no [**/.env, **/.env.local]
+allow [**/.env.example, **/.env.test]
+
+# Consistent service structure
+use kebab-case for dirs services/*
+use kebab-case for dirs libs/*
