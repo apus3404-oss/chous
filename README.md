@@ -18,6 +18,24 @@
   <a href="./README.zh.md">中文文档</a>
 </p>
 
+<p align="center">
+  <a href="https://github.com/apus3404-oss/chous/actions/workflows/ci.yml">
+    <img src="https://github.com/apus3404-oss/chous/workflows/CI/badge.svg" alt="CI Status">
+  </a>
+  <a href="https://codecov.io/gh/apus3404-oss/chous">
+    <img src="https://codecov.io/gh/apus3404-oss/chous/branch/main/graph/badge.svg" alt="Coverage">
+  </a>
+  <a href="https://www.npmjs.com/package/chous">
+    <img src="https://img.shields.io/npm/v/chous.svg" alt="npm version">
+  </a>
+  <a href="https://www.npmjs.com/package/chous">
+    <img src="https://img.shields.io/npm/dm/chous.svg" alt="npm downloads">
+  </a>
+  <a href="./LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
+  </a>
+</p>
+
 ---
 
 ## 🚀 The World's First
